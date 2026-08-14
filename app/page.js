@@ -426,9 +426,6 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))",
     gap: 6,
-    maxHeight: 320,
-    overflowY: "auto",
-    paddingRight: 4,
   },
   ballItem: {
     display: "flex",
