@@ -97,6 +97,10 @@ export default function Home() {
     spray: null,
     range: null,
     axis: null,
+    speed: null,
+    carry: null,
+    total: null,
+    spin: null,
     compression: null,
   });
 
@@ -152,6 +156,14 @@ export default function Home() {
   const sortedSpray = sortByKey(condData, "spray", sortDir.spray);
   const sortedRange = sortByKey(condData, "range", sortDir.range);
   const sortedAxis = sortByKey(condData, "axis", sortDir.axis);
+  const maxSpeed = Math.max(1, ...condData.map((d) => d.speed || 0));
+  const maxCarry = Math.max(1, ...condData.map((d) => d.carry || 0));
+  const maxTotal = Math.max(1, ...condData.map((d) => d.total || 0));
+  const maxSpin = Math.max(1, ...condData.map((d) => d.spin || 0));
+  const sortedSpeed = sortByKey(condData, "speed", sortDir.speed);
+  const sortedCarry = sortByKey(condData, "carry", sortDir.carry);
+  const sortedTotal = sortByKey(condData, "total", sortDir.total);
+  const sortedSpin = sortByKey(condData, "spin", sortDir.spin);
   const compressionData = selectedBalls.map((b) => ({
     name: b.name,
     compression: b.compression,
@@ -376,6 +388,66 @@ export default function Home() {
               })}
             </div>
           </section>
+
+          {/* Ball speed */}
+          <section style={styles.panel}>
+            <div style={styles.panelHeadRow}>
+              <h2 style={styles.panelTitle}>
+                Ball Speed — {condition} <span style={styles.unit}>(mph)</span>
+              </h2>
+              <SortButton
+                dir={sortDir.speed}
+                onClick={() => cycleSort("speed")}
+                label="ball speed"
+              />
+            </div>
+            <BarPanel data={sortedSpeed} valueKey="speed" maxValue={maxSpeed} digits={1} suffix=" mph" />
+          </section>
+
+          {/* Carry */}
+          <section style={styles.panel}>
+            <div style={styles.panelHeadRow}>
+              <h2 style={styles.panelTitle}>
+                Carry — {condition} <span style={styles.unit}>(yd)</span>
+              </h2>
+              <SortButton
+                dir={sortDir.carry}
+                onClick={() => cycleSort("carry")}
+                label="carry"
+              />
+            </div>
+            <BarPanel data={sortedCarry} valueKey="carry" maxValue={maxCarry} digits={1} suffix=" yd" />
+          </section>
+
+          {/* Total distance */}
+          <section style={styles.panel}>
+            <div style={styles.panelHeadRow}>
+              <h2 style={styles.panelTitle}>
+                Total Distance — {condition} <span style={styles.unit}>(yd)</span>
+              </h2>
+              <SortButton
+                dir={sortDir.total}
+                onClick={() => cycleSort("total")}
+                label="total distance"
+              />
+            </div>
+            <BarPanel data={sortedTotal} valueKey="total" maxValue={maxTotal} digits={1} suffix=" yd" />
+          </section>
+
+          {/* Spin */}
+          <section style={styles.panel}>
+            <div style={styles.panelHeadRow}>
+              <h2 style={styles.panelTitle}>
+                Spin — {condition} <span style={styles.unit}>(rpm)</span>
+              </h2>
+              <SortButton
+                dir={sortDir.spin}
+                onClick={() => cycleSort("spin")}
+                label="spin"
+              />
+            </div>
+            <BarPanel data={sortedSpin} valueKey="spin" maxValue={maxSpin} digits={0} suffix=" rpm" />
+          </section>
         </>
       )}
 
@@ -398,26 +470,13 @@ export default function Home() {
             Select balls to compare compression.
           </p>
         ) : (
-          <div style={styles.barChart}>
-            {sortedCompression.map((d) => {
-              const widthPct = Math.min(100, (d.compression / maxCompression) * 100);
-              return (
-                <div key={d.name} style={styles.barRow}>
-                  <div style={styles.barLabel}>{d.name}</div>
-                  <div style={styles.barTrack}>
-                    <div
-                      style={{
-                        ...styles.barFill,
-                        width: `${widthPct}%`,
-                        background: d.color,
-                      }}
-                    />
-                  </div>
-                  <div style={styles.barValue}>{d.compression}</div>
-                </div>
-              );
-            })}
-          </div>
+          <BarPanel
+            data={sortedCompression}
+            valueKey="compression"
+            maxValue={maxCompression}
+            digits={0}
+            suffix=""
+          />
         )}
       </section>
 
@@ -470,6 +529,34 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth }) {
               </svg>
             </div>
             <div style={styles.errorValue}>± {fmt(v, 2)} yd</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "" }) {
+  return (
+    <div style={styles.barChart}>
+      {data.map((d) => {
+        const v = d[valueKey];
+        const widthPct = v == null ? 0 : Math.min(100, (v / maxValue) * 100);
+        return (
+          <div key={d.name} style={styles.barRow}>
+            <div style={styles.barLabel}>{d.name}</div>
+            <div style={styles.barTrack}>
+              <div
+                style={{
+                  ...styles.barFill,
+                  width: `${widthPct}%`,
+                  background: d.color,
+                }}
+              />
+            </div>
+            <div style={styles.barValue}>
+              {v == null ? "—" : `${fmt(v, digits)}${suffix}`}
+            </div>
           </div>
         );
       })}
