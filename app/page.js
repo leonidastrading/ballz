@@ -2,23 +2,115 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { BALLS } from "../lib/data";
+import { BALLS_2024 } from "../lib/data2024";
 
-const CONDITION_TABS = [
-  { key: "Driver Fast", label: "Driver Fast" },
-  { key: "Driver Mid", label: "Driver Mid" },
-  { key: "7 Iron Fast", label: "7 Iron Fast" },
-  { key: "7 Iron Mid", label: "7 Iron Mid" },
-  { key: "Wedge Full (Dry)", label: "Full Wedge" },
-  { key: "Wedge 35", label: "Wedge 35 yd" },
-];
-
-const N = BALLS.length;
-function colorFor(index) {
-  const hue = Math.round((index * 360) / N);
-  return `hsl(${hue}, 70%, 58%)`;
+function colorsFor(balls) {
+  const n = balls.length;
+  return Object.fromEntries(
+    balls.map((b, i) => [b.name, `hsl(${Math.round((i * 360) / n)}, 70%, 58%)`])
+  );
 }
 
-const BALL_COLORS = Object.fromEntries(BALLS.map((b, i) => [b.name, colorFor(i)]));
+const SOURCES = [
+  {
+    id: "mygolfspy",
+    label: "2026 MyGolfSpy",
+    balls: BALLS,
+    conditions: [
+      { key: "Driver Fast", label: "Driver Fast" },
+      { key: "Driver Mid", label: "Driver Mid" },
+      { key: "7 Iron Fast", label: "7 Iron Fast" },
+      { key: "7 Iron Mid", label: "7 Iron Mid" },
+      { key: "Wedge Full (Dry)", label: "Full Wedge" },
+      { key: "Wedge 35", label: "Wedge 35 yd" },
+    ],
+    defaultCondition: "Driver Fast",
+    panels: [
+      {
+        type: "circle",
+        key: "footprint",
+        label: "Footprint Area",
+        unit: "(yd², circle area to scale)",
+        digits: 1,
+        valueSuffix: " yd²",
+      },
+      {
+        type: "errorline",
+        key: "spray",
+        label: "Side Spray",
+        unit: "(± yd)",
+        valueSuffix: " yd",
+      },
+      {
+        type: "errorline",
+        key: "range",
+        label: "Distance Range",
+        unit: "(± yd)",
+        valueSuffix: " yd",
+      },
+      {
+        type: "axis",
+        key: "axis",
+        label: "Axis",
+        unit: "(degrees of tilt/curve)",
+      },
+      { type: "bar", key: "speed", label: "Ball Speed", unit: "(mph)", digits: 1, suffix: " mph" },
+      { type: "bar", key: "carry", label: "Carry", unit: "(yd)", digits: 1, suffix: " yd" },
+      { type: "bar", key: "total", label: "Total Distance", unit: "(yd)", digits: 1, suffix: " yd" },
+      { type: "bar", key: "spin", label: "Spin", unit: "(rpm)", digits: 0, suffix: " rpm" },
+    ],
+    ballLevelBar: {
+      key: "compression",
+      label: "Compression",
+      unit: "(does not change with condition)",
+      maxValue: 120,
+      digits: 0,
+      suffix: "",
+    },
+    footerNote: "Data: MyGolfSpy 2026 Ball Test — dispersion & compression.",
+  },
+  {
+    id: "todaysgolfer2024",
+    label: "2024 Today's Golfer",
+    balls: BALLS_2024,
+    conditions: [
+      { key: "Driver 115mph", label: "Driver 115 mph" },
+      { key: "Driver 100mph", label: "Driver 100 mph" },
+      { key: "Driver 85mph", label: "Driver 85 mph" },
+      { key: "7-Iron ~85mph", label: "7-Iron ~85 mph" },
+      { key: "Wedge 74mph", label: "Wedge 74 mph" },
+    ],
+    defaultCondition: "Driver 115mph",
+    panels: [
+      {
+        type: "circle",
+        key: "footprint",
+        label: "Shot Area",
+        unit: "(yd², circle area to scale)",
+        digits: 1,
+        valueSuffix: " yd²",
+      },
+      {
+        type: "errorline",
+        key: "spray",
+        label: "L-R Dispersion",
+        unit: "(± yd — only measured on the wedge shot)",
+        valueSuffix: " yd",
+      },
+      { type: "bar", key: "speed", label: "Ball Speed", unit: "(mph)", digits: 1, suffix: " mph" },
+      { type: "bar", key: "carry", label: "Carry", unit: "(yd)", digits: 1, suffix: " yd" },
+      { type: "bar", key: "spin", label: "Backspin", unit: "(rpm)", digits: 0, suffix: " rpm" },
+      { type: "bar", key: "launch", label: "Launch Angle", unit: "(°)", digits: 1, suffix: "°" },
+      { type: "bar", key: "descent", label: "Descent Angle", unit: "(°)", digits: 1, suffix: "°" },
+      { type: "bar", key: "height", label: "Apex Height", unit: "(yd)", digits: 1, suffix: " yd" },
+    ],
+    ballLevelBar: null,
+    footerNote:
+      "Data: Today's Golfer 2024 Robot Test — 24 balls, driver (85/100/115mph), 7-iron (~85mph) & pitching wedge (74mph).",
+  },
+];
+
+const SOURCE_COLORS = Object.fromEntries(SOURCES.map((s) => [s.id, colorsFor(s.balls)]));
 
 function fmt(v, digits = 2) {
   if (v === null || v === undefined || Number.isNaN(v)) return "—";
@@ -39,8 +131,7 @@ function sortByKey(arr, key, dir) {
 }
 
 function SortButton({ dir, onClick, label }) {
-  const text =
-    dir === "desc" ? "High → Low" : dir === "asc" ? "Low → High" : "Sort";
+  const text = dir === "desc" ? "High → Low" : dir === "asc" ? "Low → High" : "Sort";
   const arrow = dir === "desc" ? "↓" : dir === "asc" ? "↑" : "↕";
   return (
     <button onClick={onClick} style={styles.sortBtn} title={`Sort by ${label}`}>
@@ -49,79 +140,88 @@ function SortButton({ dir, onClick, label }) {
   );
 }
 
-const STORAGE_KEY_BALLS = "ballz.selectedBalls";
-const STORAGE_KEY_CONDITION = "ballz.condition";
+const STORAGE_KEY = "ballz.appstate.v2";
 
 export default function Home() {
-  const [selected, setSelected] = useState(() => new Set());
-  const [condition, setCondition] = useState("Driver Fast");
+  const [sourceId, setSourceId] = useState(SOURCES[0].id);
+  const [selectedBySource, setSelectedBySource] = useState({});
+  const [conditionBySource, setConditionBySource] = useState({});
   const [search, setSearch] = useState("");
   const [hydrated, setHydrated] = useState(false);
+  const [sortDir, setSortDir] = useState({});
 
-  // Load saved selection/condition from localStorage once, on mount.
+  // Load saved state from localStorage once, on mount.
   useEffect(() => {
     try {
-      const savedBalls = window.localStorage.getItem(STORAGE_KEY_BALLS);
-      if (savedBalls) {
-        const names = JSON.parse(savedBalls);
-        if (Array.isArray(names)) setSelected(new Set(names));
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved.sourceId) setSourceId(saved.sourceId);
+        if (saved.selectedBySource) {
+          const rebuilt = {};
+          for (const [k, names] of Object.entries(saved.selectedBySource)) {
+            rebuilt[k] = new Set(names);
+          }
+          setSelectedBySource(rebuilt);
+        }
+        if (saved.conditionBySource) setConditionBySource(saved.conditionBySource);
       }
-      const savedCondition = window.localStorage.getItem(STORAGE_KEY_CONDITION);
-      if (savedCondition) setCondition(savedCondition);
     } catch (e) {
       // localStorage unavailable (private mode, etc.) - just skip persistence
     }
     setHydrated(true);
   }, []);
 
-  // Persist selection after the initial load, so refreshing keeps your picks.
+  // Persist state after the initial load, so refreshing keeps your picks.
   useEffect(() => {
     if (!hydrated) return;
     try {
+      const selectedPlain = {};
+      for (const [k, set] of Object.entries(selectedBySource)) {
+        selectedPlain[k] = Array.from(set);
+      }
       window.localStorage.setItem(
-        STORAGE_KEY_BALLS,
-        JSON.stringify(Array.from(selected))
+        STORAGE_KEY,
+        JSON.stringify({ sourceId, selectedBySource: selectedPlain, conditionBySource })
       );
     } catch (e) {}
-  }, [selected, hydrated]);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY_CONDITION, condition);
-    } catch (e) {}
-  }, [condition, hydrated]);
-
-  const [sortDir, setSortDir] = useState({
-    footprint: null,
-    spray: null,
-    range: null,
-    axis: null,
-    speed: null,
-    carry: null,
-    total: null,
-    spin: null,
-    compression: null,
-  });
+  }, [sourceId, selectedBySource, conditionBySource, hydrated]);
 
   function cycleSort(key) {
     setSortDir((prev) => {
       const cur = prev[key];
-      const next = cur === null ? "desc" : cur === "desc" ? "asc" : null;
+      const next = !cur ? "desc" : cur === "desc" ? "asc" : null;
       return { ...prev, [key]: next };
     });
   }
 
+  const activeSource = SOURCES.find((s) => s.id === sourceId) || SOURCES[0];
+  const BALL_COLORS = SOURCE_COLORS[activeSource.id];
+  const condition = conditionBySource[activeSource.id] || activeSource.defaultCondition;
+  const selected = selectedBySource[activeSource.id] || new Set();
+
+  function setCondition(key) {
+    setConditionBySource((prev) => ({ ...prev, [activeSource.id]: key }));
+  }
+
+  function setSelected(updater) {
+    setSelectedBySource((prev) => {
+      const cur = prev[activeSource.id] || new Set();
+      const next = typeof updater === "function" ? updater(cur) : updater;
+      return { ...prev, [activeSource.id]: next };
+    });
+  }
+
   const selectedBalls = useMemo(
-    () => BALLS.filter((b) => selected.has(b.name)),
-    [selected]
+    () => activeSource.balls.filter((b) => selected.has(b.name)),
+    [selected, activeSource]
   );
 
   const filteredBalls = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return BALLS;
-    return BALLS.filter((b) => b.name.toLowerCase().includes(q));
-  }, [search]);
+    if (!q) return activeSource.balls;
+    return activeSource.balls.filter((b) => b.name.toLowerCase().includes(q));
+  }, [search, activeSource]);
 
   function toggleBall(name) {
     setSelected((prev) => {
@@ -133,7 +233,7 @@ export default function Home() {
   }
 
   function selectAll() {
-    setSelected(new Set(BALLS.map((b) => b.name)));
+    setSelected(new Set(activeSource.balls.map((b) => b.name)));
   }
   function clearAll() {
     setSelected(new Set());
@@ -143,36 +243,21 @@ export default function Home() {
   const condData = selectedBalls.map((b) => ({
     name: b.name,
     color: BALL_COLORS[b.name],
+    meta: b.meta,
     compression: b.compression,
     ...b.conditions[condition],
   }));
 
-  const maxFootprint = Math.max(1, ...condData.map((d) => d.footprint || 0));
-  const maxSpray = Math.max(0.1, ...condData.map((d) => d.spray || 0));
-  const maxRange = Math.max(0.1, ...condData.map((d) => d.range || 0));
-  const maxCompression = 120;
-
-  const sortedFootprint = sortByKey(condData, "footprint", sortDir.footprint);
-  const sortedSpray = sortByKey(condData, "spray", sortDir.spray);
-  const sortedRange = sortByKey(condData, "range", sortDir.range);
-  const sortedAxis = sortByKey(condData, "axis", sortDir.axis);
-  const maxSpeed = Math.max(1, ...condData.map((d) => d.speed || 0));
-  const maxCarry = Math.max(1, ...condData.map((d) => d.carry || 0));
-  const maxTotal = Math.max(1, ...condData.map((d) => d.total || 0));
-  const maxSpin = Math.max(1, ...condData.map((d) => d.spin || 0));
-  const sortedSpeed = sortByKey(condData, "speed", sortDir.speed);
-  const sortedCarry = sortByKey(condData, "carry", sortDir.carry);
-  const sortedTotal = sortByKey(condData, "total", sortDir.total);
-  const sortedSpin = sortByKey(condData, "spin", sortDir.spin);
-  const compressionData = selectedBalls.map((b) => ({
-    name: b.name,
-    compression: b.compression,
-    color: BALL_COLORS[b.name],
-  }));
-  const sortedCompression = sortByKey(compressionData, "compression", sortDir.compression);
-
   const CIRCLE_MAX_RADIUS = 70; // px, for the largest footprint among selected
   const LINE_MAX_HALF = 220; // px, half-width for the largest spray/range among selected
+
+  const ballLevelData = activeSource.ballLevelBar
+    ? selectedBalls.map((b) => ({
+        name: b.name,
+        color: BALL_COLORS[b.name],
+        [activeSource.ballLevelBar.key]: b[activeSource.ballLevelBar.key],
+      }))
+    : [];
 
   return (
     <main style={styles.main}>
@@ -183,8 +268,23 @@ export default function Home() {
         </p>
       </header>
 
+      <section style={styles.sourceTabs}>
+        {SOURCES.map((s) => (
+          <button
+            key={s.id}
+            onClick={() => setSourceId(s.id)}
+            style={{
+              ...styles.sourceTabBtn,
+              ...(activeSource.id === s.id ? styles.sourceTabBtnActive : {}),
+            }}
+          >
+            {s.label}
+          </button>
+        ))}
+      </section>
+
       <section style={styles.tabs}>
-        {CONDITION_TABS.map((t) => (
+        {activeSource.conditions.map((t) => (
           <button
             key={t.key}
             onClick={() => setCondition(t.key)}
@@ -200,7 +300,9 @@ export default function Home() {
 
       <section style={styles.panel}>
         <div style={styles.panelHeadRow}>
-          <h2 style={styles.panelTitle}>Balls ({selected.size} selected)</h2>
+          <h2 style={styles.panelTitle}>
+            Balls ({selected.size} selected of {activeSource.balls.length})
+          </h2>
           <div style={{ display: "flex", gap: 8 }}>
             <button style={styles.smallBtn} onClick={selectAll}>
               Select all
@@ -233,13 +335,11 @@ export default function Home() {
                   onChange={() => toggleBall(b.name)}
                   style={{ marginRight: 8 }}
                 />
-                <span
-                  style={{
-                    ...styles.swatch,
-                    background: BALL_COLORS[b.name],
-                  }}
-                />
-                <span style={styles.ballName}>{b.name}</span>
+                <span style={{ ...styles.swatch, background: BALL_COLORS[b.name] }} />
+                <span style={styles.ballTextWrap}>
+                  <span style={styles.ballName}>{b.name}</span>
+                  {b.meta && <span style={styles.ballMeta}>{b.meta}</span>}
+                </span>
               </label>
             );
           })}
@@ -254,281 +354,229 @@ export default function Home() {
         </section>
       ) : (
         <>
-          {/* Footprint area */}
-          <section style={styles.panel}>
-            <div style={styles.panelHeadRow}>
-              <h2 style={styles.panelTitle}>
-                Footprint Area — {condition}{" "}
-                <span style={styles.unit}>(yd², circle area to scale)</span>
-              </h2>
-              <SortButton
-                dir={sortDir.footprint}
-                onClick={() => cycleSort("footprint")}
-                label="footprint area"
-              />
-            </div>
-            <div style={styles.circleRow}>
-              {sortedFootprint.map((d) => {
-                const r =
-                  CIRCLE_MAX_RADIUS * Math.sqrt((d.footprint || 0) / maxFootprint);
-                const size = CIRCLE_MAX_RADIUS * 2 + 20;
-                return (
-                  <div key={d.name} style={styles.circleCell}>
-                    <svg width={size} height={size}>
-                      <circle
-                        cx={size / 2}
-                        cy={size / 2}
-                        r={Math.max(r, 2)}
-                        fill={d.color}
-                        fillOpacity="0.35"
-                        stroke={d.color}
-                        strokeWidth="2"
-                      />
-                    </svg>
-                    <div style={styles.cellLabel}>{d.name}</div>
-                    <div style={styles.cellValue}>{fmt(d.footprint, 1)} yd²</div>
+          {activeSource.panels.map((panel) => {
+            const dir = sortDir[panel.key] || null;
+            const sorted = sortByKey(condData, panel.key, dir);
+
+            if (panel.type === "circle") {
+              const maxValue = Math.max(1, ...condData.map((d) => d[panel.key] || 0));
+              return (
+                <section style={styles.panel} key={panel.key}>
+                  <div style={styles.panelHeadRow}>
+                    <h2 style={styles.panelTitle}>
+                      {panel.label} — {condition} <span style={styles.unit}>{panel.unit}</span>
+                    </h2>
+                    <SortButton dir={dir} onClick={() => cycleSort(panel.key)} label={panel.label} />
                   </div>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Side spray */}
-          <section style={styles.panel}>
-            <div style={styles.panelHeadRow}>
-              <h2 style={styles.panelTitle}>
-                Side Spray — {condition} <span style={styles.unit}>(± yd)</span>
-              </h2>
-              <SortButton
-                dir={sortDir.spray}
-                onClick={() => cycleSort("spray")}
-                label="side spray"
-              />
-            </div>
-            <ErrorLineChart
-              data={sortedSpray}
-              valueKey="spray"
-              maxValue={maxSpray}
-              maxHalfWidth={LINE_MAX_HALF}
-            />
-          </section>
-
-          {/* Distance range */}
-          <section style={styles.panel}>
-            <div style={styles.panelHeadRow}>
-              <h2 style={styles.panelTitle}>
-                Distance Range — {condition} <span style={styles.unit}>(± yd)</span>
-              </h2>
-              <SortButton
-                dir={sortDir.range}
-                onClick={() => cycleSort("range")}
-                label="distance range"
-              />
-            </div>
-            <ErrorLineChart
-              data={sortedRange}
-              valueKey="range"
-              maxValue={maxRange}
-              maxHalfWidth={LINE_MAX_HALF}
-            />
-          </section>
-
-          {/* Axis degree */}
-          <section style={styles.panel}>
-            <div style={styles.panelHeadRow}>
-              <h2 style={styles.panelTitle}>
-                Axis — {condition} <span style={styles.unit}>(degrees of tilt/curve)</span>
-              </h2>
-              <SortButton
-                dir={sortDir.axis}
-                onClick={() => cycleSort("axis")}
-                label="axis"
-              />
-            </div>
-            <div style={styles.circleRow}>
-              {sortedAxis.map((d) => {
-                const size = 100;
-                const half = size / 2;
-                const hasAxis = d.axis !== null && d.axis !== undefined;
-                const len = half - 10;
-                const angleRad = ((hasAxis ? d.axis : 0) * Math.PI) / 180;
-                const x2 = half + len * Math.sin(angleRad);
-                const y2 = half - len * Math.cos(angleRad);
-                return (
-                  <div key={d.name} style={styles.circleCell}>
-                    <svg width={size} height={size}>
-                      <line
-                        x1={half}
-                        y1={half}
-                        x2={half}
-                        y2={10}
-                        stroke="#3a3a3a"
-                        strokeWidth="2"
-                        strokeDasharray="3,3"
-                      />
-                      {hasAxis && (
-                        <line
-                          x1={half}
-                          y1={half}
-                          x2={x2}
-                          y2={y2}
-                          stroke={d.color}
-                          strokeWidth="4"
-                          strokeLinecap="round"
-                        />
-                      )}
-                      <circle cx={half} cy={half} r="3" fill="#888" />
-                    </svg>
-                    <div style={styles.cellLabel}>{d.name}</div>
-                    <div style={styles.cellValue}>
-                      {hasAxis ? `${fmt(d.axis, 2)}°` : "n/a"}
-                    </div>
+                  <div style={styles.circleRow}>
+                    {sorted.map((d) => {
+                      const val = d[panel.key];
+                      const r = CIRCLE_MAX_RADIUS * Math.sqrt((val || 0) / maxValue);
+                      const size = CIRCLE_MAX_RADIUS * 2 + 20;
+                      return (
+                        <div key={d.name} style={styles.circleCell}>
+                          <svg width={size} height={size}>
+                            <circle
+                              cx={size / 2}
+                              cy={size / 2}
+                              r={Math.max(r, 2)}
+                              fill={d.color}
+                              fillOpacity="0.35"
+                              stroke={d.color}
+                              strokeWidth="2"
+                            />
+                          </svg>
+                          <div style={styles.cellLabel}>{d.name}</div>
+                          <div style={styles.cellValue}>
+                            {fmt(val, panel.digits ?? 1)}
+                            {panel.valueSuffix || ""}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
-          </section>
+                </section>
+              );
+            }
 
-          {/* Ball speed */}
-          <section style={styles.panel}>
-            <div style={styles.panelHeadRow}>
-              <h2 style={styles.panelTitle}>
-                Ball Speed — {condition} <span style={styles.unit}>(mph)</span>
-              </h2>
-              <SortButton
-                dir={sortDir.speed}
-                onClick={() => cycleSort("speed")}
-                label="ball speed"
-              />
-            </div>
-            <BarPanel data={sortedSpeed} valueKey="speed" maxValue={maxSpeed} digits={1} suffix=" mph" />
-          </section>
+            if (panel.type === "errorline") {
+              const maxValue = Math.max(0.1, ...condData.map((d) => d[panel.key] || 0));
+              return (
+                <section style={styles.panel} key={panel.key}>
+                  <div style={styles.panelHeadRow}>
+                    <h2 style={styles.panelTitle}>
+                      {panel.label} — {condition} <span style={styles.unit}>{panel.unit}</span>
+                    </h2>
+                    <SortButton dir={dir} onClick={() => cycleSort(panel.key)} label={panel.label} />
+                  </div>
+                  <ErrorLineChart
+                    data={sorted}
+                    valueKey={panel.key}
+                    maxValue={maxValue}
+                    maxHalfWidth={LINE_MAX_HALF}
+                    suffix={panel.valueSuffix || ""}
+                  />
+                </section>
+              );
+            }
 
-          {/* Carry */}
-          <section style={styles.panel}>
-            <div style={styles.panelHeadRow}>
-              <h2 style={styles.panelTitle}>
-                Carry — {condition} <span style={styles.unit}>(yd)</span>
-              </h2>
-              <SortButton
-                dir={sortDir.carry}
-                onClick={() => cycleSort("carry")}
-                label="carry"
-              />
-            </div>
-            <BarPanel data={sortedCarry} valueKey="carry" maxValue={maxCarry} digits={1} suffix=" yd" />
-          </section>
+            if (panel.type === "axis") {
+              return (
+                <section style={styles.panel} key={panel.key}>
+                  <div style={styles.panelHeadRow}>
+                    <h2 style={styles.panelTitle}>
+                      {panel.label} — {condition} <span style={styles.unit}>{panel.unit}</span>
+                    </h2>
+                    <SortButton dir={dir} onClick={() => cycleSort(panel.key)} label={panel.label} />
+                  </div>
+                  <div style={styles.circleRow}>
+                    {sorted.map((d) => {
+                      const size = 100;
+                      const half = size / 2;
+                      const hasAxis = d.axis !== null && d.axis !== undefined;
+                      const len = half - 10;
+                      const angleRad = ((hasAxis ? d.axis : 0) * Math.PI) / 180;
+                      const x2 = half + len * Math.sin(angleRad);
+                      const y2 = half - len * Math.cos(angleRad);
+                      return (
+                        <div key={d.name} style={styles.circleCell}>
+                          <svg width={size} height={size}>
+                            <line
+                              x1={half}
+                              y1={half}
+                              x2={half}
+                              y2={10}
+                              stroke="#3a3a3a"
+                              strokeWidth="2"
+                              strokeDasharray="3,3"
+                            />
+                            {hasAxis && (
+                              <line
+                                x1={half}
+                                y1={half}
+                                x2={x2}
+                                y2={y2}
+                                stroke={d.color}
+                                strokeWidth="4"
+                                strokeLinecap="round"
+                              />
+                            )}
+                            <circle cx={half} cy={half} r="3" fill="#888" />
+                          </svg>
+                          <div style={styles.cellLabel}>{d.name}</div>
+                          <div style={styles.cellValue}>{hasAxis ? `${fmt(d.axis, 2)}°` : "n/a"}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            }
 
-          {/* Total distance */}
-          <section style={styles.panel}>
-            <div style={styles.panelHeadRow}>
-              <h2 style={styles.panelTitle}>
-                Total Distance — {condition} <span style={styles.unit}>(yd)</span>
-              </h2>
-              <SortButton
-                dir={sortDir.total}
-                onClick={() => cycleSort("total")}
-                label="total distance"
-              />
-            </div>
-            <BarPanel data={sortedTotal} valueKey="total" maxValue={maxTotal} digits={1} suffix=" yd" />
-          </section>
-
-          {/* Spin */}
-          <section style={styles.panel}>
-            <div style={styles.panelHeadRow}>
-              <h2 style={styles.panelTitle}>
-                Spin — {condition} <span style={styles.unit}>(rpm)</span>
-              </h2>
-              <SortButton
-                dir={sortDir.spin}
-                onClick={() => cycleSort("spin")}
-                label="spin"
-              />
-            </div>
-            <BarPanel data={sortedSpin} valueKey="spin" maxValue={maxSpin} digits={0} suffix=" rpm" />
-          </section>
+            // bar
+            const maxValue = Math.max(1, ...condData.map((d) => d[panel.key] || 0));
+            return (
+              <section style={styles.panel} key={panel.key}>
+                <div style={styles.panelHeadRow}>
+                  <h2 style={styles.panelTitle}>
+                    {panel.label} — {condition} <span style={styles.unit}>{panel.unit}</span>
+                  </h2>
+                  <SortButton dir={dir} onClick={() => cycleSort(panel.key)} label={panel.label} />
+                </div>
+                <BarPanel
+                  data={sorted}
+                  valueKey={panel.key}
+                  maxValue={maxValue}
+                  digits={panel.digits ?? 1}
+                  suffix={panel.suffix || ""}
+                />
+              </section>
+            );
+          })}
         </>
       )}
 
-      {/* Compression - condition independent */}
-      <section style={styles.panel}>
-        <div style={styles.panelHeadRow}>
-          <h2 style={styles.panelTitle}>
-            Compression <span style={styles.unit}>(does not change with condition)</span>
-          </h2>
-          {selectedBalls.length > 0 && (
-            <SortButton
-              dir={sortDir.compression}
-              onClick={() => cycleSort("compression")}
-              label="compression"
+      {activeSource.ballLevelBar && (
+        <section style={styles.panel}>
+          <div style={styles.panelHeadRow}>
+            <h2 style={styles.panelTitle}>
+              {activeSource.ballLevelBar.label} <span style={styles.unit}>{activeSource.ballLevelBar.unit}</span>
+            </h2>
+            {selectedBalls.length > 0 && (
+              <SortButton
+                dir={sortDir[activeSource.ballLevelBar.key] || null}
+                onClick={() => cycleSort(activeSource.ballLevelBar.key)}
+                label={activeSource.ballLevelBar.label}
+              />
+            )}
+          </div>
+          {selectedBalls.length === 0 ? (
+            <p style={{ color: "#888", textAlign: "center", padding: "24px 0" }}>
+              Select balls to compare {activeSource.ballLevelBar.label.toLowerCase()}.
+            </p>
+          ) : (
+            <BarPanel
+              data={sortByKey(ballLevelData, activeSource.ballLevelBar.key, sortDir[activeSource.ballLevelBar.key])}
+              valueKey={activeSource.ballLevelBar.key}
+              maxValue={activeSource.ballLevelBar.maxValue}
+              digits={activeSource.ballLevelBar.digits}
+              suffix={activeSource.ballLevelBar.suffix}
             />
           )}
-        </div>
-        {selectedBalls.length === 0 ? (
-          <p style={{ color: "#888", textAlign: "center", padding: "24px 0" }}>
-            Select balls to compare compression.
-          </p>
-        ) : (
-          <BarPanel
-            data={sortedCompression}
-            valueKey="compression"
-            maxValue={maxCompression}
-            digits={0}
-            suffix=""
-          />
-        )}
-      </section>
+        </section>
+      )}
 
-      <footer style={styles.footer}>Data: MyGolfSpy 2026 Ball Test — dispersion &amp; compression.</footer>
+      <footer style={styles.footer}>{activeSource.footerNote}</footer>
     </main>
   );
 }
 
-function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth }) {
+function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" }) {
   return (
     <div style={styles.errorChart}>
       {data.map((d) => {
-        const v = d[valueKey] || 0;
+        const raw = d[valueKey];
+        const hasVal = raw !== null && raw !== undefined;
+        const v = hasVal ? raw : 0;
         const halfPx = maxHalfWidth * (v / maxValue);
         return (
           <div key={d.name} style={styles.errorRow}>
             <div style={styles.errorLabel}>{d.name}</div>
             <div style={styles.errorTrack}>
               <div style={styles.errorCenterLine} />
-              <svg
-                width={maxHalfWidth * 2 + 20}
-                height="24"
-                style={{ position: "relative" }}
-              >
-                <line
-                  x1={maxHalfWidth + 10 - halfPx}
-                  y1="12"
-                  x2={maxHalfWidth + 10 + halfPx}
-                  y2="12"
-                  stroke={d.color}
-                  strokeWidth="3"
-                />
-                <line
-                  x1={maxHalfWidth + 10 - halfPx}
-                  y1="4"
-                  x2={maxHalfWidth + 10 - halfPx}
-                  y2="20"
-                  stroke={d.color}
-                  strokeWidth="3"
-                />
-                <line
-                  x1={maxHalfWidth + 10 + halfPx}
-                  y1="4"
-                  x2={maxHalfWidth + 10 + halfPx}
-                  y2="20"
-                  stroke={d.color}
-                  strokeWidth="3"
-                />
+              <svg width={maxHalfWidth * 2 + 20} height="24" style={{ position: "relative" }}>
+                {hasVal && (
+                  <>
+                    <line
+                      x1={maxHalfWidth + 10 - halfPx}
+                      y1="12"
+                      x2={maxHalfWidth + 10 + halfPx}
+                      y2="12"
+                      stroke={d.color}
+                      strokeWidth="3"
+                    />
+                    <line
+                      x1={maxHalfWidth + 10 - halfPx}
+                      y1="4"
+                      x2={maxHalfWidth + 10 - halfPx}
+                      y2="20"
+                      stroke={d.color}
+                      strokeWidth="3"
+                    />
+                    <line
+                      x1={maxHalfWidth + 10 + halfPx}
+                      y1="4"
+                      x2={maxHalfWidth + 10 + halfPx}
+                      y2="20"
+                      stroke={d.color}
+                      strokeWidth="3"
+                    />
+                  </>
+                )}
                 <circle cx={maxHalfWidth + 10} cy="12" r="2" fill="#666" />
               </svg>
             </div>
-            <div style={styles.errorValue}>± {fmt(v, 2)} yd</div>
+            <div style={styles.errorValue}>{hasVal ? `± ${fmt(v, 2)}${suffix}` : "n/a"}</div>
           </div>
         );
       })}
@@ -554,9 +602,7 @@ function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "" }) {
                 }}
               />
             </div>
-            <div style={styles.barValue}>
-              {v == null ? "—" : `${fmt(v, digits)}${suffix}`}
-            </div>
+            <div style={styles.barValue}>{v == null ? "—" : `${fmt(v, digits)}${suffix}`}</div>
           </div>
         );
       })}
@@ -577,6 +623,27 @@ const styles = {
   header: { marginBottom: 18 },
   title: { fontSize: 28, margin: "0 0 4px" },
   subtitle: { color: "#999", margin: 0, fontSize: 14 },
+  sourceTabs: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 14,
+  },
+  sourceTabBtn: {
+    background: "#141414",
+    color: "#ccc",
+    border: "1px solid #3a3a3a",
+    borderRadius: 10,
+    padding: "10px 18px",
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: "pointer",
+  },
+  sourceTabBtnActive: {
+    background: "#173a17",
+    color: "#8bffa0",
+    borderColor: "#2fd65f",
+  },
   tabs: {
     display: "flex",
     flexWrap: "wrap",
@@ -671,10 +738,23 @@ const styles = {
     marginRight: 8,
     flex: "0 0 auto",
   },
+  ballTextWrap: {
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+    lineHeight: 1.25,
+  },
   ballName: {
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
+  },
+  ballMeta: {
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    fontSize: 10.5,
+    color: "#888",
   },
   circleRow: {
     display: "flex",
