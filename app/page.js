@@ -5,6 +5,7 @@ import { BALLS } from "../lib/data";
 import { BALLS_2024 } from "../lib/data2024";
 import { BALLS_2025 } from "../lib/data2025";
 import { BALLS_MGS2025 } from "../lib/dataMgs2025";
+import { WEDGE_WET_DRY } from "../lib/dataWedgeWetDry";
 
 function colorsFor(balls) {
   const n = balls.length;
@@ -64,6 +65,16 @@ const SOURCES = [
         digits: 0,
         suffix: "",
       },
+    ],
+    wedgeWetDryData: WEDGE_WET_DRY,
+    wedgeWetDryPanels: [
+      { key: "carry", label: "Carry", unit: "(yd)", digits: 1, suffix: " yd" },
+      { key: "total", label: "Total Distance", unit: "(yd)", digits: 1, suffix: " yd" },
+      { key: "speed", label: "Ball Speed", unit: "(mph)", digits: 1, suffix: " mph" },
+      { key: "spin", label: "Spin", unit: "(rpm)", digits: 0, suffix: " rpm" },
+      { key: "footprint", label: "Footprint Area", unit: "(yd²)", digits: 1, suffix: " yd²" },
+      { key: "spray", label: "Side Spray", unit: "(yd)", digits: 2, suffix: " yd" },
+      { key: "range", label: "Distance Range", unit: "(yd)", digits: 2, suffix: " yd" },
     ],
     footerNote: "Data: MyGolfSpy 2026 Ball Test — dispersion & compression.",
   },
@@ -550,6 +561,57 @@ export default function Home() {
         </section>
       ))}
 
+      {activeSource.wedgeWetDryPanels && selectedBalls.length > 0 && (
+        <>
+          <h2 style={styles.sectionHeading}>Wedge Full — Wet vs Dry</h2>
+          <div style={styles.rangeLegend}>
+            <span>
+              <span style={{ ...styles.rangeLegendDot, background: "#e6e6e6" }} />
+              Dry
+            </span>
+            <span>
+              <span style={{ ...styles.rangeLegendDot, background: "#3fc7ff" }} />
+              Wet
+            </span>
+            <span>Shaded band = change from dry to wet.</span>
+          </div>
+          {activeSource.wedgeWetDryPanels.map((panel) => {
+            const sortKey = `wetdry_${panel.key}`;
+            const dir = sortDir[sortKey] || null;
+            const raw = selectedBalls.map((b) => {
+              const entry = activeSource.wedgeWetDryData[b.name] || {};
+              const dry = entry.dry ? entry.dry[panel.key] ?? null : null;
+              const wet = entry.wet ? entry.wet[panel.key] ?? null : null;
+              return {
+                name: b.name,
+                color: BALL_COLORS[b.name],
+                dry,
+                wet,
+                sortval: wet ?? dry,
+              };
+            });
+            const sorted = sortByKey(raw, "sortval", dir);
+            const maxValue = Math.max(1, ...raw.flatMap((d) => [d.dry || 0, d.wet || 0]));
+            return (
+              <section style={styles.panel} key={sortKey}>
+                <div style={styles.panelHeadRow}>
+                  <h2 style={styles.panelTitle}>
+                    {panel.label} — Wedge Full <span style={styles.unit}>{panel.unit}</span>
+                  </h2>
+                  <SortButton dir={dir} onClick={() => cycleSort(sortKey)} label={panel.label} />
+                </div>
+                <RangeBarChart
+                  data={sorted}
+                  maxValue={maxValue}
+                  digits={panel.digits ?? 1}
+                  suffix={panel.suffix || ""}
+                />
+              </section>
+            );
+          })}
+        </>
+      )}
+
       <footer style={styles.footer}>{activeSource.footerNote}</footer>
     </main>
   );
@@ -637,6 +699,69 @@ function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = 
   );
 }
 
+function RangeBarChart({ data, maxValue, digits = 1, suffix = "" }) {
+  return (
+    <div style={styles.barChart}>
+      {data.map((d) => {
+        const hasDry = d.dry !== null && d.dry !== undefined;
+        const hasWet = d.wet !== null && d.wet !== undefined;
+        const dryPct = hasDry ? Math.min(100, (d.dry / maxValue) * 100) : null;
+        const wetPct = hasWet ? Math.min(100, (d.wet / maxValue) * 100) : null;
+        const lo = hasDry && hasWet ? Math.min(dryPct, wetPct) : null;
+        const hi = hasDry && hasWet ? Math.max(dryPct, wetPct) : null;
+        return (
+          <div key={d.name} style={styles.barRow}>
+            <div style={styles.barLabel}>{d.name}</div>
+            <div style={styles.barTrack}>
+              {lo !== null && (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: `${lo}%`,
+                    width: `${hi - lo}%`,
+                    top: 0,
+                    bottom: 0,
+                    background: d.color,
+                    opacity: 0.4,
+                  }}
+                />
+              )}
+              {hasDry && (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: `calc(${dryPct}% - 1px)`,
+                    top: 0,
+                    bottom: 0,
+                    width: 2,
+                    background: "#e6e6e6",
+                  }}
+                />
+              )}
+              {hasWet && (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: `calc(${wetPct}% - 1px)`,
+                    top: 0,
+                    bottom: 0,
+                    width: 2,
+                    background: "#3fc7ff",
+                  }}
+                />
+              )}
+            </div>
+            <div style={styles.barValue}>
+              {hasDry ? fmt(d.dry, digits) : "—"} → {hasWet ? fmt(d.wet, digits) : "—"}
+              {suffix}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 const styles = {
   main: {
     minHeight: "100vh",
@@ -707,6 +832,12 @@ const styles = {
     marginBottom: 10,
   },
   panelTitle: { fontSize: 16, margin: "0 0 12px", fontWeight: 600 },
+  sectionHeading: {
+    fontSize: 18,
+    fontWeight: 700,
+    margin: "8px 0 4px",
+    color: "#eee",
+  },
   unit: { color: "#888", fontWeight: 400, fontSize: 12 },
   smallBtn: {
     background: "#232323",
@@ -850,9 +981,25 @@ const styles = {
     borderRadius: 5,
     height: 14,
     overflow: "hidden",
+    position: "relative",
   },
   barFill: { height: "100%" },
   barValue: { fontSize: 12, color: "#ccc", textAlign: "right" },
+  rangeLegend: {
+    display: "flex",
+    gap: 16,
+    fontSize: 11,
+    color: "#999",
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  rangeLegendDot: {
+    display: "inline-block",
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+    marginRight: 5,
+  },
   footer: {
     textAlign: "center",
     color: "#555",
