@@ -468,17 +468,19 @@ export default function Home() {
                       const size = CIRCLE_MAX_RADIUS * 2 + 20;
                       return (
                         <div key={d.name} style={styles.circleCell}>
-                          <svg width={size} height={size}>
-                            <circle
-                              cx={size / 2}
-                              cy={size / 2}
-                              r={Math.max(r, 2)}
-                              fill={d.color}
-                              fillOpacity="0.35"
-                              stroke={d.color}
-                              strokeWidth="2"
-                            />
-                          </svg>
+                          <div style={styles.circleSvgWrap}>
+                            <svg viewBox={`0 0 ${size} ${size}`} width="100%" height="100%">
+                              <circle
+                                cx={size / 2}
+                                cy={size / 2}
+                                r={Math.max(r, 2)}
+                                fill={d.color}
+                                fillOpacity="0.35"
+                                stroke={d.color}
+                                strokeWidth="2"
+                              />
+                            </svg>
+                          </div>
                           <div style={styles.cellLabel}>{d.name}</div>
                           <div style={styles.cellValue}>
                             {fmt(val, panel.digits ?? 1)}
@@ -656,7 +658,13 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
             <div style={styles.errorLabel}>{d.name}</div>
             <div style={styles.errorTrack}>
               <div style={styles.errorCenterLine} />
-              <svg width={maxHalfWidth * 2 + 20} height="24" style={{ position: "relative" }}>
+              <svg
+                viewBox={`0 0 ${maxHalfWidth * 2 + 20} 24`}
+                width="100%"
+                height="24"
+                preserveAspectRatio="none"
+                style={{ display: "block" }}
+              >
                 {hasVal && (
                   <>
                     <line
@@ -957,6 +965,12 @@ const styles = {
     flexDirection: "column",
     alignItems: "center",
     width: 120,
+    maxWidth: "100%",
+  },
+  circleSvgWrap: {
+    width: "100%",
+    maxWidth: 160,
+    aspectRatio: "1 / 1",
   },
   cellLabel: {
     fontSize: 11.5,
@@ -969,7 +983,7 @@ const styles = {
   errorChart: { display: "flex", flexDirection: "column", gap: 6 },
   errorRow: {
     display: "grid",
-    gridTemplateColumns: "160px 1fr 90px",
+    gridTemplateColumns: "minmax(70px, 160px) minmax(0, 1fr) minmax(60px, 90px)",
     alignItems: "center",
     gap: 10,
   },
@@ -993,7 +1007,7 @@ const styles = {
   barChart: { display: "flex", flexDirection: "column", gap: 8 },
   barRow: {
     display: "grid",
-    gridTemplateColumns: "170px 1fr 50px",
+    gridTemplateColumns: "minmax(70px, 170px) minmax(0, 1fr) minmax(45px, 50px)",
     alignItems: "center",
     gap: 10,
   },
