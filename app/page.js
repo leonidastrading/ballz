@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { BALLS } from "../lib/data";
 import { BALLS_2024 } from "../lib/data2024";
+import { BALLS_2025 } from "../lib/data2025";
 
 function colorsFor(balls) {
   const n = balls.length;
@@ -53,14 +54,16 @@ const SOURCES = [
       { type: "bar", key: "total", label: "Total Distance", unit: "(yd)", digits: 1, suffix: " yd" },
       { type: "bar", key: "spin", label: "Spin", unit: "(rpm)", digits: 0, suffix: " rpm" },
     ],
-    ballLevelBar: {
-      key: "compression",
-      label: "Compression",
-      unit: "(does not change with condition)",
-      maxValue: 120,
-      digits: 0,
-      suffix: "",
-    },
+    ballLevelBars: [
+      {
+        key: "compression",
+        label: "Compression",
+        unit: "(does not change with condition)",
+        maxValue: 120,
+        digits: 0,
+        suffix: "",
+      },
+    ],
     footerNote: "Data: MyGolfSpy 2026 Ball Test — dispersion & compression.",
   },
   {
@@ -98,9 +101,50 @@ const SOURCES = [
         valueSuffix: " yd",
       },
     ],
-    ballLevelBar: null,
+    ballLevelBars: [],
     footerNote:
       "Data: Today's Golfer 2024 Robot Test — 24 balls, driver (85/100/115mph), 7-iron (~85mph) & pitching wedge (74mph).",
+  },
+  {
+    id: "todaysgolfer2025",
+    label: "2025 Today's Golfer",
+    balls: BALLS_2025,
+    conditions: [
+      { key: "Driver114", label: "Driver 114 mph" },
+      { key: "Driver93", label: "Driver 93 mph" },
+      { key: "Driver78", label: "Driver 78 mph" },
+      { key: "Iron80", label: "7-Iron 80 mph" },
+      { key: "Wedge46", label: "Wedge 46 mph" },
+    ],
+    defaultCondition: "Driver114",
+    panels: [
+      { type: "bar", key: "carry", label: "Carry", unit: "(yd)", digits: 1, suffix: " yd" },
+      { type: "bar", key: "speed", label: "Ball Speed", unit: "(mph)", digits: 1, suffix: " mph" },
+      { type: "bar", key: "spin", label: "Backspin", unit: "(rpm)", digits: 0, suffix: " rpm" },
+      { type: "bar", key: "launch", label: "Launch Angle", unit: "(°)", digits: 1, suffix: "°" },
+      { type: "bar", key: "descent", label: "Descent Angle", unit: "(°)", digits: 1, suffix: "°" },
+      { type: "bar", key: "height", label: "Apex Height", unit: "(yd)", digits: 1, suffix: " yd" },
+    ],
+    ballLevelBars: [
+      {
+        key: "compression",
+        label: "Compression",
+        unit: "(does not change with condition)",
+        maxValue: 120,
+        digits: 0,
+        suffix: "",
+      },
+      {
+        key: "compression_sd",
+        label: "Compression Consistency (± SD)",
+        unit: "(lower = more consistent manufacturing, does not change with condition)",
+        maxValue: 8,
+        digits: 1,
+        suffix: "",
+      },
+    ],
+    footerNote:
+      "Data: Today's Golfer 2025 Robot Test — 62 balls, driver (78/93/114mph), 7-iron (80mph) & wedge (46mph). Carry/ball speed not measured on the wedge shot.",
   },
 ];
 
@@ -245,13 +289,11 @@ export default function Home() {
   const CIRCLE_MAX_RADIUS = 70; // px, for the largest footprint among selected
   const LINE_MAX_HALF = 220; // px, half-width for the largest spray/range among selected
 
-  const ballLevelData = activeSource.ballLevelBar
-    ? selectedBalls.map((b) => ({
-        name: b.name,
-        color: BALL_COLORS[b.name],
-        [activeSource.ballLevelBar.key]: b[activeSource.ballLevelBar.key],
-      }))
-    : [];
+  const ballLevelData = selectedBalls.map((b) => ({
+    name: b.name,
+    color: BALL_COLORS[b.name],
+    ...Object.fromEntries((activeSource.ballLevelBars || []).map((bl) => [bl.key, b[bl.key]])),
+  }));
 
   return (
     <main style={styles.main}>
@@ -437,35 +479,35 @@ export default function Home() {
         </>
       )}
 
-      {activeSource.ballLevelBar && (
-        <section style={styles.panel}>
+      {(activeSource.ballLevelBars || []).map((bl) => (
+        <section style={styles.panel} key={bl.key}>
           <div style={styles.panelHeadRow}>
             <h2 style={styles.panelTitle}>
-              {activeSource.ballLevelBar.label} <span style={styles.unit}>{activeSource.ballLevelBar.unit}</span>
+              {bl.label} <span style={styles.unit}>{bl.unit}</span>
             </h2>
             {selectedBalls.length > 0 && (
               <SortButton
-                dir={sortDir[activeSource.ballLevelBar.key] || null}
-                onClick={() => cycleSort(activeSource.ballLevelBar.key)}
-                label={activeSource.ballLevelBar.label}
+                dir={sortDir[bl.key] || null}
+                onClick={() => cycleSort(bl.key)}
+                label={bl.label}
               />
             )}
           </div>
           {selectedBalls.length === 0 ? (
             <p style={{ color: "#888", textAlign: "center", padding: "24px 0" }}>
-              Select balls to compare {activeSource.ballLevelBar.label.toLowerCase()}.
+              Select balls to compare {bl.label.toLowerCase()}.
             </p>
           ) : (
             <BarPanel
-              data={sortByKey(ballLevelData, activeSource.ballLevelBar.key, sortDir[activeSource.ballLevelBar.key])}
-              valueKey={activeSource.ballLevelBar.key}
-              maxValue={activeSource.ballLevelBar.maxValue}
-              digits={activeSource.ballLevelBar.digits}
-              suffix={activeSource.ballLevelBar.suffix}
+              data={sortByKey(ballLevelData, bl.key, sortDir[bl.key])}
+              valueKey={bl.key}
+              maxValue={bl.maxValue}
+              digits={bl.digits}
+              suffix={bl.suffix}
             />
           )}
         </section>
-      )}
+      ))}
 
       <footer style={styles.footer}>{activeSource.footerNote}</footer>
     </main>
