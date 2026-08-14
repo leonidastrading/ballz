@@ -355,7 +355,7 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth }) {
 const styles = {
   main: {
     minHeight: "100vh",
-    background: "#0d0d0d",
+    background: "#000000",
     color: "#e6e6e6",
     fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
     padding: "24px 20px 60px",
