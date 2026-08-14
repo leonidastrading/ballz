@@ -66,6 +66,7 @@ const SOURCES = [
         suffix: "",
       },
     ],
+    wedgeWetDryCondition: "Wedge Full (Dry)",
     wedgeWetDryData: WEDGE_WET_DRY,
     wedgeWetDryPanels: [
       { key: "carry", label: "Carry", unit: "(yd)", digits: 1, suffix: " yd" },
@@ -561,7 +562,9 @@ export default function Home() {
         </section>
       ))}
 
-      {activeSource.wedgeWetDryPanels && selectedBalls.length > 0 && (
+      {activeSource.wedgeWetDryPanels &&
+        selectedBalls.length > 0 &&
+        condition === activeSource.wedgeWetDryCondition && (
         <>
           <h2 style={styles.sectionHeading}>Wedge Full — Wet vs Dry</h2>
           <div style={styles.rangeLegend}>
