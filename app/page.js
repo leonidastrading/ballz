@@ -235,7 +235,15 @@ export default function Home() {
   const [conditionBySource, setConditionBySource] = useState({});
   const [search, setSearch] = useState("");
   const [hydrated, setHydrated] = useState(false);
-  const [sortDir, setSortDir] = useState({});
+  const [sortDir, setSortDir] = useState({
+    wetdry_carry: "desc",
+    wetdry_total: "desc",
+    wetdry_speed: "desc",
+    wetdry_spin: "desc",
+    wetdry_footprint: "desc",
+    wetdry_spray: "desc",
+    wetdry_range: "desc",
+  });
 
   // Load saved state from localStorage once, on mount.
   useEffect(() => {
@@ -585,12 +593,13 @@ export default function Home() {
               const entry = activeSource.wedgeWetDryData[b.name] || {};
               const dry = entry.dry ? entry.dry[panel.key] ?? null : null;
               const wet = entry.wet ? entry.wet[panel.key] ?? null : null;
+              const delta = dry !== null && wet !== null ? Math.abs(wet - dry) : null;
               return {
                 name: b.name,
                 color: BALL_COLORS[b.name],
                 dry,
                 wet,
-                sortval: wet ?? dry,
+                sortval: delta,
               };
             });
             const sorted = sortByKey(raw, "sortval", dir);
