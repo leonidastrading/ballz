@@ -48,12 +48,6 @@ const SOURCES = [
         unit: "(± yd)",
         valueSuffix: " yd",
       },
-      {
-        type: "axis",
-        key: "axis",
-        label: "Axis",
-        unit: "(degrees of tilt/curve)",
-      },
       { type: "bar", key: "speed", label: "Ball Speed", unit: "(mph)", digits: 1, suffix: " mph" },
       { type: "bar", key: "carry", label: "Carry", unit: "(yd)", digits: 1, suffix: " yd" },
       { type: "bar", key: "total", label: "Total Distance", unit: "(yd)", digits: 1, suffix: " yd" },
@@ -420,59 +414,6 @@ export default function Home() {
               );
             }
 
-            if (panel.type === "axis") {
-              return (
-                <section style={styles.panel} key={panel.key}>
-                  <div style={styles.panelHeadRow}>
-                    <h2 style={styles.panelTitle}>
-                      {panel.label} — {condition} <span style={styles.unit}>{panel.unit}</span>
-                    </h2>
-                    <SortButton dir={dir} onClick={() => cycleSort(panel.key)} label={panel.label} />
-                  </div>
-                  <div style={styles.circleRow}>
-                    {sorted.map((d) => {
-                      const size = 100;
-                      const half = size / 2;
-                      const hasAxis = d.axis !== null && d.axis !== undefined;
-                      const len = half - 10;
-                      const angleRad = ((hasAxis ? d.axis : 0) * Math.PI) / 180;
-                      const x2 = half + len * Math.sin(angleRad);
-                      const y2 = half - len * Math.cos(angleRad);
-                      return (
-                        <div key={d.name} style={styles.circleCell}>
-                          <svg width={size} height={size}>
-                            <line
-                              x1={half}
-                              y1={half}
-                              x2={half}
-                              y2={10}
-                              stroke="#3a3a3a"
-                              strokeWidth="2"
-                              strokeDasharray="3,3"
-                            />
-                            {hasAxis && (
-                              <line
-                                x1={half}
-                                y1={half}
-                                x2={x2}
-                                y2={y2}
-                                stroke={d.color}
-                                strokeWidth="4"
-                                strokeLinecap="round"
-                              />
-                            )}
-                            <circle cx={half} cy={half} r="3" fill="#888" />
-                          </svg>
-                          <div style={styles.cellLabel}>{d.name}</div>
-                          <div style={styles.cellValue}>{hasAxis ? `${fmt(d.axis, 2)}°` : "n/a"}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-              );
-            }
-
             // bar
             const maxValue = Math.max(1, ...condData.map((d) => d[panel.key] || 0));
             return (
@@ -715,6 +656,9 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))",
     gap: 6,
+    maxHeight: 190,
+    overflowY: "auto",
+    paddingRight: 6,
   },
   ballItem: {
     display: "flex",
