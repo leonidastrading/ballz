@@ -25,6 +25,30 @@ function fmt(v, digits = 2) {
   return v.toFixed(digits);
 }
 
+function sortByKey(arr, key, dir) {
+  if (!dir) return arr;
+  const copy = [...arr];
+  copy.sort((a, b) => {
+    const av = a[key];
+    const bv = b[key];
+    if (av === null || av === undefined) return 1;
+    if (bv === null || bv === undefined) return -1;
+    return dir === "asc" ? av - bv : bv - av;
+  });
+  return copy;
+}
+
+function SortButton({ dir, onClick, label }) {
+  const text =
+    dir === "desc" ? "High → Low" : dir === "asc" ? "Low → High" : "Sort";
+  const arrow = dir === "desc" ? "↓" : dir === "asc" ? "↑" : "↕";
+  return (
+    <button onClick={onClick} style={styles.sortBtn} title={`Sort by ${label}`}>
+      {arrow} {text}
+    </button>
+  );
+}
+
 const STORAGE_KEY_BALLS = "ballz.selectedBalls";
 const STORAGE_KEY_CONDITION = "ballz.condition";
 
@@ -68,6 +92,22 @@ export default function Home() {
     } catch (e) {}
   }, [condition, hydrated]);
 
+  const [sortDir, setSortDir] = useState({
+    footprint: null,
+    spray: null,
+    range: null,
+    axis: null,
+    compression: null,
+  });
+
+  function cycleSort(key) {
+    setSortDir((prev) => {
+      const cur = prev[key];
+      const next = cur === null ? "desc" : cur === "desc" ? "asc" : null;
+      return { ...prev, [key]: next };
+    });
+  }
+
   const selectedBalls = useMemo(
     () => BALLS.filter((b) => selected.has(b.name)),
     [selected]
@@ -107,6 +147,17 @@ export default function Home() {
   const maxSpray = Math.max(0.1, ...condData.map((d) => d.spray || 0));
   const maxRange = Math.max(0.1, ...condData.map((d) => d.range || 0));
   const maxCompression = 120;
+
+  const sortedFootprint = sortByKey(condData, "footprint", sortDir.footprint);
+  const sortedSpray = sortByKey(condData, "spray", sortDir.spray);
+  const sortedRange = sortByKey(condData, "range", sortDir.range);
+  const sortedAxis = sortByKey(condData, "axis", sortDir.axis);
+  const compressionData = selectedBalls.map((b) => ({
+    name: b.name,
+    compression: b.compression,
+    color: BALL_COLORS[b.name],
+  }));
+  const sortedCompression = sortByKey(compressionData, "compression", sortDir.compression);
 
   const CIRCLE_MAX_RADIUS = 70; // px, for the largest footprint among selected
   const LINE_MAX_HALF = 220; // px, half-width for the largest spray/range among selected
@@ -193,12 +244,19 @@ export default function Home() {
         <>
           {/* Footprint area */}
           <section style={styles.panel}>
-            <h2 style={styles.panelTitle}>
-              Footprint Area — {condition}{" "}
-              <span style={styles.unit}>(yd², circle area to scale)</span>
-            </h2>
+            <div style={styles.panelHeadRow}>
+              <h2 style={styles.panelTitle}>
+                Footprint Area — {condition}{" "}
+                <span style={styles.unit}>(yd², circle area to scale)</span>
+              </h2>
+              <SortButton
+                dir={sortDir.footprint}
+                onClick={() => cycleSort("footprint")}
+                label="footprint area"
+              />
+            </div>
             <div style={styles.circleRow}>
-              {condData.map((d) => {
+              {sortedFootprint.map((d) => {
                 const r =
                   CIRCLE_MAX_RADIUS * Math.sqrt((d.footprint || 0) / maxFootprint);
                 const size = CIRCLE_MAX_RADIUS * 2 + 20;
@@ -225,11 +283,18 @@ export default function Home() {
 
           {/* Side spray */}
           <section style={styles.panel}>
-            <h2 style={styles.panelTitle}>
-              Side Spray — {condition} <span style={styles.unit}>(± yd)</span>
-            </h2>
+            <div style={styles.panelHeadRow}>
+              <h2 style={styles.panelTitle}>
+                Side Spray — {condition} <span style={styles.unit}>(± yd)</span>
+              </h2>
+              <SortButton
+                dir={sortDir.spray}
+                onClick={() => cycleSort("spray")}
+                label="side spray"
+              />
+            </div>
             <ErrorLineChart
-              data={condData}
+              data={sortedSpray}
               valueKey="spray"
               maxValue={maxSpray}
               maxHalfWidth={LINE_MAX_HALF}
@@ -238,11 +303,18 @@ export default function Home() {
 
           {/* Distance range */}
           <section style={styles.panel}>
-            <h2 style={styles.panelTitle}>
-              Distance Range — {condition} <span style={styles.unit}>(± yd)</span>
-            </h2>
+            <div style={styles.panelHeadRow}>
+              <h2 style={styles.panelTitle}>
+                Distance Range — {condition} <span style={styles.unit}>(± yd)</span>
+              </h2>
+              <SortButton
+                dir={sortDir.range}
+                onClick={() => cycleSort("range")}
+                label="distance range"
+              />
+            </div>
             <ErrorLineChart
-              data={condData}
+              data={sortedRange}
               valueKey="range"
               maxValue={maxRange}
               maxHalfWidth={LINE_MAX_HALF}
@@ -251,11 +323,18 @@ export default function Home() {
 
           {/* Axis degree */}
           <section style={styles.panel}>
-            <h2 style={styles.panelTitle}>
-              Axis — {condition} <span style={styles.unit}>(degrees of tilt/curve)</span>
-            </h2>
+            <div style={styles.panelHeadRow}>
+              <h2 style={styles.panelTitle}>
+                Axis — {condition} <span style={styles.unit}>(degrees of tilt/curve)</span>
+              </h2>
+              <SortButton
+                dir={sortDir.axis}
+                onClick={() => cycleSort("axis")}
+                label="axis"
+              />
+            </div>
             <div style={styles.circleRow}>
-              {condData.map((d) => {
+              {sortedAxis.map((d) => {
                 const size = 100;
                 const half = size / 2;
                 const hasAxis = d.axis !== null && d.axis !== undefined;
@@ -302,31 +381,39 @@ export default function Home() {
 
       {/* Compression - condition independent */}
       <section style={styles.panel}>
-        <h2 style={styles.panelTitle}>
-          Compression <span style={styles.unit}>(does not change with condition)</span>
-        </h2>
+        <div style={styles.panelHeadRow}>
+          <h2 style={styles.panelTitle}>
+            Compression <span style={styles.unit}>(does not change with condition)</span>
+          </h2>
+          {selectedBalls.length > 0 && (
+            <SortButton
+              dir={sortDir.compression}
+              onClick={() => cycleSort("compression")}
+              label="compression"
+            />
+          )}
+        </div>
         {selectedBalls.length === 0 ? (
           <p style={{ color: "#888", textAlign: "center", padding: "24px 0" }}>
             Select balls to compare compression.
           </p>
         ) : (
           <div style={styles.barChart}>
-            {selectedBalls.map((b) => {
-              const color = BALL_COLORS[b.name];
-              const widthPct = Math.min(100, (b.compression / maxCompression) * 100);
+            {sortedCompression.map((d) => {
+              const widthPct = Math.min(100, (d.compression / maxCompression) * 100);
               return (
-                <div key={b.name} style={styles.barRow}>
-                  <div style={styles.barLabel}>{b.name}</div>
+                <div key={d.name} style={styles.barRow}>
+                  <div style={styles.barLabel}>{d.name}</div>
                   <div style={styles.barTrack}>
                     <div
                       style={{
                         ...styles.barFill,
                         width: `${widthPct}%`,
-                        background: color,
+                        background: d.color,
                       }}
                     />
                   </div>
-                  <div style={styles.barValue}>{b.compression}</div>
+                  <div style={styles.barValue}>{d.compression}</div>
                 </div>
               );
             })}
@@ -448,6 +535,16 @@ const styles = {
     padding: "5px 10px",
     fontSize: 12,
     cursor: "pointer",
+  },
+  sortBtn: {
+    background: "#1b1b1b",
+    color: "#9db8ff",
+    border: "1px solid #2f5fd6",
+    borderRadius: 6,
+    padding: "5px 12px",
+    fontSize: 12,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
   },
   search: {
     width: "100%",
