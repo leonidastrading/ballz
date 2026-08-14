@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BALLS } from "../lib/data";
 
 const CONDITION_TABS = [
@@ -25,10 +25,48 @@ function fmt(v, digits = 2) {
   return v.toFixed(digits);
 }
 
+const STORAGE_KEY_BALLS = "ballz.selectedBalls";
+const STORAGE_KEY_CONDITION = "ballz.condition";
+
 export default function Home() {
   const [selected, setSelected] = useState(() => new Set());
   const [condition, setCondition] = useState("Driver Fast");
   const [search, setSearch] = useState("");
+  const [hydrated, setHydrated] = useState(false);
+
+  // Load saved selection/condition from localStorage once, on mount.
+  useEffect(() => {
+    try {
+      const savedBalls = window.localStorage.getItem(STORAGE_KEY_BALLS);
+      if (savedBalls) {
+        const names = JSON.parse(savedBalls);
+        if (Array.isArray(names)) setSelected(new Set(names));
+      }
+      const savedCondition = window.localStorage.getItem(STORAGE_KEY_CONDITION);
+      if (savedCondition) setCondition(savedCondition);
+    } catch (e) {
+      // localStorage unavailable (private mode, etc.) - just skip persistence
+    }
+    setHydrated(true);
+  }, []);
+
+  // Persist selection after the initial load, so refreshing keeps your picks.
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY_BALLS,
+        JSON.stringify(Array.from(selected))
+      );
+    } catch (e) {}
+  }, [selected, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY_CONDITION, condition);
+    } catch (e) {}
+  }, [condition, hydrated]);
 
   const selectedBalls = useMemo(
     () => BALLS.filter((b) => selected.has(b.name)),
