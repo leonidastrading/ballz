@@ -591,7 +591,16 @@ export default function Home() {
               };
             });
             const sorted = sortByKey(raw, "sortval", dir);
-            const maxValue = Math.max(1, ...raw.flatMap((d) => [d.dry || 0, d.wet || 0]));
+            const vals = raw.flatMap((d) => [d.dry, d.wet]).filter((v) => v !== null && v !== undefined);
+            let domainMin = vals.length ? Math.min(...vals) : 0;
+            let domainMax = vals.length ? Math.max(...vals) : 1;
+            if (domainMin === domainMax) {
+              domainMin -= 1;
+              domainMax += 1;
+            }
+            const pad = (domainMax - domainMin) * 0.12;
+            domainMin -= pad;
+            domainMax = Math.max(domainMax + pad, 0.0001 + domainMin);
             return (
               <section style={styles.panel} key={sortKey}>
                 <div style={styles.panelHeadRow}>
@@ -600,9 +609,14 @@ export default function Home() {
                   </h2>
                   <SortButton dir={dir} onClick={() => cycleSort(sortKey)} label={panel.label} />
                 </div>
+                <div style={styles.rangeScaleLabel}>
+                  scale: {fmt(domainMin, panel.digits ?? 1)} – {fmt(domainMax, panel.digits ?? 1)}
+                  {panel.suffix || ""}
+                </div>
                 <RangeBarChart
                   data={sorted}
-                  maxValue={maxValue}
+                  domainMin={domainMin}
+                  domainMax={domainMax}
                   digits={panel.digits ?? 1}
                   suffix={panel.suffix || ""}
                 />
@@ -699,16 +713,19 @@ function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = 
   );
 }
 
-function RangeBarChart({ data, maxValue, digits = 1, suffix = "" }) {
+function RangeBarChart({ data, domainMin, domainMax, digits = 1, suffix = "" }) {
+  const span = domainMax - domainMin || 1;
+  const toPct = (v) => Math.min(100, Math.max(0, ((v - domainMin) / span) * 100));
   return (
     <div style={styles.barChart}>
       {data.map((d) => {
         const hasDry = d.dry !== null && d.dry !== undefined;
         const hasWet = d.wet !== null && d.wet !== undefined;
-        const dryPct = hasDry ? Math.min(100, (d.dry / maxValue) * 100) : null;
-        const wetPct = hasWet ? Math.min(100, (d.wet / maxValue) * 100) : null;
+        const dryPct = hasDry ? toPct(d.dry) : null;
+        const wetPct = hasWet ? toPct(d.wet) : null;
         const lo = hasDry && hasWet ? Math.min(dryPct, wetPct) : null;
         const hi = hasDry && hasWet ? Math.max(dryPct, wetPct) : null;
+        const bandWidth = lo !== null ? Math.max(hi - lo, 1.2) : null;
         return (
           <div key={d.name} style={styles.barRow}>
             <div style={styles.barLabel}>{d.name}</div>
@@ -718,11 +735,11 @@ function RangeBarChart({ data, maxValue, digits = 1, suffix = "" }) {
                   style={{
                     position: "absolute",
                     left: `${lo}%`,
-                    width: `${hi - lo}%`,
+                    width: `${bandWidth}%`,
                     top: 0,
                     bottom: 0,
                     background: d.color,
-                    opacity: 0.4,
+                    opacity: 0.55,
                   }}
                 />
               )}
@@ -730,10 +747,10 @@ function RangeBarChart({ data, maxValue, digits = 1, suffix = "" }) {
                 <div
                   style={{
                     position: "absolute",
-                    left: `calc(${dryPct}% - 1px)`,
+                    left: `calc(${dryPct}% - 1.5px)`,
                     top: 0,
                     bottom: 0,
-                    width: 2,
+                    width: 3,
                     background: "#e6e6e6",
                   }}
                 />
@@ -742,10 +759,10 @@ function RangeBarChart({ data, maxValue, digits = 1, suffix = "" }) {
                 <div
                   style={{
                     position: "absolute",
-                    left: `calc(${wetPct}% - 1px)`,
+                    left: `calc(${wetPct}% - 1.5px)`,
                     top: 0,
                     bottom: 0,
-                    width: 2,
+                    width: 3,
                     background: "#3fc7ff",
                   }}
                 />
@@ -999,6 +1016,11 @@ const styles = {
     height: 8,
     borderRadius: "50%",
     marginRight: 5,
+  },
+  rangeScaleLabel: {
+    fontSize: 10.5,
+    color: "#777",
+    marginBottom: 8,
   },
   footer: {
     textAlign: "center",
