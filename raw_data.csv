@@ -1,0 +1,289 @@
+Ball,Compression,Condition,Footprint_Area_yd2,Side_Spray_yd,Distance_Range_yd,Axis_deg
+Amazon Basics,55,7 Iron Fast,72.5,4.53,5.32,0.8
+Amazon Basics,55,7 Iron Mid,388,9.72,12.73,2.67
+Amazon Basics,55,Driver Fast,251.3,12.99,6.46,3.52
+Amazon Basics,55,Driver Mid,118.1,8.71,6.48,2.57
+Amazon Basics,55,Wedge 35,0.46,0.44,0.34,
+Amazon Basics,55,Wedge Full (Dry),2.9,1.24,0.76,0
+Bridgestone e12 Straight,66,7 Iron Fast,381.7,13.41,9.35,0.78
+Bridgestone e12 Straight,66,7 Iron Mid,255.6,5.65,14.4,2.2
+Bridgestone e12 Straight,66,Driver Fast,621.6,15.51,13.47,1.55
+Bridgestone e12 Straight,66,Driver Mid,546.8,8.95,19.99,2.22
+Bridgestone e12 Straight,66,Wedge 35,0.43,0.32,0.46,
+Bridgestone e12 Straight,66,Wedge Full (Dry),6.45,1.56,1.36,
+Bridgestone Tour B RX,89,7 Iron Fast,94.6,6.19,4.92,1.94
+Bridgestone Tour B RX,89,7 Iron Mid,195.1,7.5,8.48,1.63
+Bridgestone Tour B RX,89,Driver Fast,789.7,23.58,10.93,1.16
+Bridgestone Tour B RX,89,Driver Mid,456.4,10.76,13.55,0.83
+Bridgestone Tour B RX,89,Wedge 35,0.7,0.39,0.58,
+Bridgestone Tour B RX,89,Wedge Full (Dry),5.19,1.13,1.46,
+Bridgestone Tour B RXS,72,7 Iron Fast,273.4,7.99,12.01,1.22
+Bridgestone Tour B RXS,72,7 Iron Mid,211.2,5.38,12.85,1.44
+Bridgestone Tour B RXS,72,Driver Fast,1060.7,22.78,14.86,0.4
+Bridgestone Tour B RXS,72,Driver Mid,778.5,16.89,16.29,0.98
+Bridgestone Tour B RXS,72,Wedge 35,0.36,0.27,0.45,0
+Bridgestone Tour B RXS,72,Wedge Full (Dry),4.24,1.31,1.29,
+Bridgestone Tour B X,100,7 Iron Fast,277.3,10.41,13.69,2.11
+Bridgestone Tour B X,100,7 Iron Mid,113.7,9.95,5.47,0.47
+Bridgestone Tour B X,100,Driver Fast,409.5,11.1,12.16,1.45
+Bridgestone Tour B X,100,Driver Mid,463.7,9.56,15.49,1.72
+Bridgestone Tour B X,100,Wedge 35,0.53,0.34,0.49,0
+Bridgestone Tour B X,100,Wedge Full (Dry),2.18,0.67,1.05,
+Bridgestone Tour B XS,89,7 Iron Fast,188,6.31,9.82,2.01
+Bridgestone Tour B XS,89,7 Iron Mid,325.9,9.73,11.44,1.03
+Bridgestone Tour B XS,89,Driver Fast,735,12.34,19.07,1.63
+Bridgestone Tour B XS,89,Driver Mid,438.5,11.29,13.62,2.65
+Bridgestone Tour B XS,89,Wedge 35,0.53,0.41,0.42,0
+Bridgestone Tour B XS,89,Wedge Full (Dry),2.97,1.34,0.83,
+Callaway Chrome Soft,77,7 Iron Fast,551.7,13.06,14.34,0.77
+Callaway Chrome Soft,77,7 Iron Mid,311.7,9.53,10.57,1.47
+Callaway Chrome Soft,77,Driver Fast,435.8,20.18,8.94,1.9
+Callaway Chrome Soft,77,Driver Mid,491.7,14.27,10.99,1.96
+Callaway Chrome Soft,77,Wedge 35,0.68,0.38,0.61,
+Callaway Chrome Soft,77,Wedge Full (Dry),2.38,0.82,0.92,
+Callaway Chrome Tour,94,7 Iron Fast,95.6,7.68,4.22,1.51
+Callaway Chrome Tour,94,7 Iron Mid,295.4,10.96,9.49,2
+Callaway Chrome Tour,94,Driver Fast,270.2,13.97,6.78,0.86
+Callaway Chrome Tour,94,Driver Mid,492.7,12.36,14.09,0.92
+Callaway Chrome Tour,94,Wedge 35,0.34,0.32,0.36,0
+Callaway Chrome Tour,94,Wedge Full (Dry),1.51,0.85,0.57,
+Callaway Chrome Tour Triple Diamond,101,7 Iron Fast,221.1,10.37,8.52,2.5
+Callaway Chrome Tour Triple Diamond,101,7 Iron Mid,293.8,11.57,8.35,1.46
+Callaway Chrome Tour Triple Diamond,101,Driver Fast,1300,32.07,14.25,1.56
+Callaway Chrome Tour Triple Diamond,101,Driver Mid,964.2,22.6,15.02,1.38
+Callaway Chrome Tour Triple Diamond,101,Wedge 35,0.44,0.3,0.47,0
+Callaway Chrome Tour Triple Diamond,101,Wedge Full (Dry),2.77,1.02,0.92,
+Callaway Chrome Tour X,99,7 Iron Fast,90.4,5.77,6.54,1.4
+Callaway Chrome Tour X,99,7 Iron Mid,361,8.07,14.7,2.26
+Callaway Chrome Tour X,99,Driver Fast,323.5,13.03,8.33,1.35
+Callaway Chrome Tour X,99,Driver Mid,821.9,13.89,19.81,1.43
+Callaway Chrome Tour X,99,Wedge 35,0.28,0.33,0.38,0
+Callaway Chrome Tour X,99,Wedge Full (Dry),1.61,0.59,0.88,
+Callaway Supersoft,49,7 Iron Fast,184.9,8.17,7.26,1.21
+Callaway Supersoft,49,7 Iron Mid,278.9,7.18,12.42,2.91
+Callaway Supersoft,49,Driver Fast,962.2,27.07,11.94,3.03
+Callaway Supersoft,49,Driver Mid,681.1,13.61,16.76,1.45
+Callaway Supersoft,49,Wedge 35,0.45,0.37,0.4,
+Callaway Supersoft,49,Wedge Full (Dry),2.68,1.06,1.01,
+Kirkland Performance+ White,94,7 Iron Fast,115.7,7.99,5.33,2.56
+Kirkland Performance+ White,94,7 Iron Mid,239.6,7.41,12.96,2.08
+Kirkland Performance+ White,94,Driver Fast,403.4,20.28,6.84,3.05
+Kirkland Performance+ White,94,Driver Mid,473.8,9.37,16.14,1.87
+Kirkland Performance+ White,94,Wedge 35,0.34,0.24,0.5,0
+Kirkland Performance+ White,94,Wedge Full (Dry),2.6,1.18,0.7,
+Kirkland Performance+ Yellow,96,7 Iron Fast,88.4,6.3,4.5,1.43
+Kirkland Performance+ Yellow,96,7 Iron Mid,182.5,7.44,7.86,1.75
+Kirkland Performance+ Yellow,96,Driver Fast,863.7,20.28,14.1,1.25
+Kirkland Performance+ Yellow,96,Driver Mid,697.4,16.13,14.38,2.81
+Kirkland Performance+ Yellow,96,Wedge 35,0.37,0.44,0.38,
+Kirkland Performance+ Yellow,96,Wedge Full (Dry),2.11,0.93,0.72,
+Maxfli Tour,94,7 Iron Fast,102.4,6.01,5.53,1.49
+Maxfli Tour,94,7 Iron Mid,179,6.24,9.2,0.48
+Maxfli Tour,94,Driver Fast,314.3,13.48,9.01,1.93
+Maxfli Tour,94,Driver Mid,398.1,11.49,11.07,2.68
+Maxfli Tour,94,Wedge 35,0.49,0.33,0.48,0
+Maxfli Tour,94,Wedge Full (Dry),1.83,0.9,0.74,
+Maxfli Tour S,80,7 Iron Fast,293.9,13.85,7.1,0.98
+Maxfli Tour S,80,7 Iron Mid,370.5,6.59,18.85,1.95
+Maxfli Tour S,80,Driver Fast,673.2,20.11,10.69,0.29
+Maxfli Tour S,80,Driver Mid,259.8,8.62,11.06,1.19
+Maxfli Tour S,80,Wedge 35,0.27,0.21,0.43,0
+Maxfli Tour S,80,Wedge Full (Dry),3.72,1.69,0.7,
+Maxfli Tour X,102,7 Iron Fast,177,8.08,9.86,1.61
+Maxfli Tour X,102,7 Iron Mid,361.7,6.28,18.84,1.51
+Maxfli Tour X,102,Driver Fast,769,15.98,16.1,0.15
+Maxfli Tour X,102,Driver Mid,378.8,15.48,9.67,1.68
+Maxfli Tour X,102,Wedge 35,0.37,0.3,0.4,
+Maxfli Tour X,102,Wedge Full (Dry),4.18,1.37,1,
+Maxfli Tour X LS,97,7 Iron Fast,264.6,11.2,12.91,1.38
+Maxfli Tour X LS,97,7 Iron Mid,172.8,7.93,9.09,1.13
+Maxfli Tour X LS,97,Driver Fast,337.3,9.27,11.58,0.37
+Maxfli Tour X LS,97,Driver Mid,592.7,12.97,15.11,0.76
+Maxfli Tour X LS,97,Wedge 35,0.3,0.37,0.35,0
+Maxfli Tour X LS,97,Wedge Full (Dry),2.93,1.21,0.8,
+Mizuno Pro S,96,7 Iron Fast,73,7.42,3.15,1.67
+Mizuno Pro S,96,7 Iron Mid,238.4,9.95,7.62,0.37
+Mizuno Pro S,96,Driver Fast,642.9,16.1,12.71,1.08
+Mizuno Pro S,96,Driver Mid,496.4,11.19,14.15,2.63
+Mizuno Pro S,96,Wedge 35,0.97,0.5,0.72,0
+Mizuno Pro S,96,Wedge Full (Dry),6.32,2.03,1.02,
+Mizuno Pro X,102,7 Iron Fast,179.5,7.17,8.06,1.36
+Mizuno Pro X,102,7 Iron Mid,191.6,8.71,7.05,1.09
+Mizuno Pro X,102,Driver Fast,783,15.83,16.57,0.91
+Mizuno Pro X,102,Driver Mid,422.8,9.93,14.04,1.96
+Mizuno Pro X,102,Wedge 35,0.32,0.34,0.5,0
+Mizuno Pro X,102,Wedge Full (Dry),6.03,1.73,1.26,
+PXG Xtreme Tour,94,7 Iron Fast,51.4,4.35,3.79,1.69
+PXG Xtreme Tour,94,7 Iron Mid,293.9,14.28,6.56,1.68
+PXG Xtreme Tour,94,Driver Fast,357,13.58,8.56,2.13
+PXG Xtreme Tour,94,Driver Mid,496.6,9.96,15.91,2.54
+PXG Xtreme Tour,94,Wedge 35,0.27,0.29,0.3,
+PXG Xtreme Tour,94,Wedge Full (Dry),4.59,1.75,0.84,
+PXG Xtreme Tour X,101,7 Iron Fast,89.4,7.61,9.61,1.49
+PXG Xtreme Tour X,101,7 Iron Mid,369.4,12.4,13.18,2.22
+PXG Xtreme Tour X,101,Driver Fast,515.9,12.04,13.64,0.5
+PXG Xtreme Tour X,101,Driver Mid,353.8,9.82,12.09,1.57
+PXG Xtreme Tour X,101,Wedge 35,0.85,0.45,0.6,
+PXG Xtreme Tour X,101,Wedge Full (Dry),3.26,0.92,1.14,
+Snell PR3,93,7 Iron Fast,89.4,6.1,5.21,1.37
+Snell PR3,93,7 Iron Mid,303.5,10.11,10.25,1.27
+Snell PR3,93,Driver Fast,755.3,19.35,13.01,0.14
+Snell PR3,93,Driver Mid,742.9,14,17.74,2.19
+Snell PR3,93,Wedge 35,0.28,0.28,0.32,0
+Snell PR3,93,Wedge Full (Dry),2.69,1.01,0.85,
+Snell PR4,91,7 Iron Fast,60.4,8.92,2.17,0.88
+Snell PR4,91,7 Iron Mid,266.1,10.04,8.67,1.62
+Snell PR4,91,Driver Fast,1058.7,23.87,15.78,1.66
+Snell PR4,91,Driver Mid,672.6,14.18,15.84,2.11
+Snell PR4,91,Wedge 35,0.48,0.4,0.38,
+Snell PR4,91,Wedge Full (Dry),3.22,1.45,0.72,
+Srixon Q-Star Tour,70,7 Iron Fast,149.9,5.55,11.35,1.01
+Srixon Q-Star Tour,70,7 Iron Mid,221.2,6.24,13.97,1.63
+Srixon Q-Star Tour,70,Driver Fast,268.5,18.05,4.77,0.01
+Srixon Q-Star Tour,70,Driver Mid,477.3,15.57,9.96,2.05
+Srixon Q-Star Tour,70,Wedge 35,0.33,0.34,0.32,
+Srixon Q-Star Tour,70,Wedge Full (Dry),6.26,1.5,1.38,
+Srixon Q-Star Ultispeed,85,7 Iron Fast,249.5,9.25,9.37,0.81
+Srixon Q-Star Ultispeed,85,7 Iron Mid,208.5,5.77,11.72,1.84
+Srixon Q-Star Ultispeed,85,Driver Fast,628.2,31.27,6.54,2.66
+Srixon Q-Star Ultispeed,85,Driver Mid,407.7,10.31,14.4,1.65
+Srixon Q-Star Ultispeed,85,Wedge 35,0.56,0.32,0.56,
+Srixon Q-Star Ultispeed,85,Wedge Full (Dry),1.73,0.71,0.84,
+Srixon Soft Feel,58,7 Iron Fast,284,7.79,12.31,0.71
+Srixon Soft Feel,58,7 Iron Mid,190,7.25,9.6,2
+Srixon Soft Feel,58,Driver Fast,582.5,15.17,13.07,2.83
+Srixon Soft Feel,58,Driver Mid,560,12.96,14.33,1.85
+Srixon Soft Feel,58,Wedge 35,1.14,0.47,0.78,0
+Srixon Soft Feel,58,Wedge Full (Dry),7.81,1.91,1.41,
+Srixon Z-Star,81,7 Iron Fast,62.4,6.14,3.37,0.98
+Srixon Z-Star,81,7 Iron Mid,284.5,10.17,9.68,1.23
+Srixon Z-Star,81,Driver Fast,429,15.05,9.08,1.26
+Srixon Z-Star,81,Driver Mid,790.4,16.66,15.45,1.49
+Srixon Z-Star,81,Wedge 35,0.56,0.45,0.42,0
+Srixon Z-Star,81,Wedge Full (Dry),4.52,1.11,1.31,
+Srixon Z-Star Diamond,93,7 Iron Fast,77.1,7.23,3.52,1.39
+Srixon Z-Star Diamond,93,7 Iron Mid,165.6,5.91,9.79,1.36
+Srixon Z-Star Diamond,93,Driver Fast,383.8,13.05,11.3,1.05
+Srixon Z-Star Diamond,93,Driver Mid,852.5,19.27,15.82,0.52
+Srixon Z-Star Diamond,93,Wedge 35,0.51,0.43,0.44,0
+Srixon Z-Star Diamond,93,Wedge Full (Dry),5.62,1.47,1.39,
+Srixon Z-Star XV,96,7 Iron Fast,73.5,5.48,4.33,1.17
+Srixon Z-Star XV,96,7 Iron Mid,182.2,5.09,11.48,1.81
+Srixon Z-Star XV,96,Driver Fast,635.9,20.17,10.29,1.63
+Srixon Z-Star XV,96,Driver Mid,447,13.43,12.33,2.35
+Srixon Z-Star XV,96,Wedge 35,0.44,0.35,0.4,0
+Srixon Z-Star XV,96,Wedge Full (Dry),3.72,1.2,1.27,
+TaylorMade SpeedSoft,50,7 Iron Fast,254.9,9.29,14.14,0.48
+TaylorMade SpeedSoft,50,7 Iron Mid,266.1,6.41,14.13,2.25
+TaylorMade SpeedSoft,50,Driver Fast,842.4,22.13,13.09,1.83
+TaylorMade SpeedSoft,50,Driver Mid,146.5,7.17,6.54,2.44
+TaylorMade SpeedSoft,50,Wedge 35,0.45,0.3,0.51,0
+TaylorMade SpeedSoft,50,Wedge Full (Dry),6.56,1.77,1.21,0
+TaylorMade Tour Response,74,7 Iron Fast,313.7,11.29,12.63,1.56
+TaylorMade Tour Response,74,7 Iron Mid,205.1,6.79,12.24,2.22
+TaylorMade Tour Response,74,Driver Fast,617.1,21.53,11.63,3.74
+TaylorMade Tour Response,74,Driver Mid,529.2,15.1,13.18,3.86
+TaylorMade Tour Response,74,Wedge 35,0.41,0.29,0.46,0
+TaylorMade Tour Response,74,Wedge Full (Dry),2.77,0.94,0.95,
+TaylorMade TP5,93,7 Iron Fast,158.7,7.56,6.93,1.65
+TaylorMade TP5,93,7 Iron Mid,446.7,8.89,16.05,2.35
+TaylorMade TP5,93,Driver Fast,633.5,19.19,13.39,1.22
+TaylorMade TP5,93,Driver Mid,513.6,16.11,12.38,2.32
+TaylorMade TP5,93,Wedge 35,0.72,0.52,0.44,0
+TaylorMade TP5,93,Wedge Full (Dry),3.48,0.71,1.61,
+TaylorMade TP5X,98,7 Iron Fast,191.6,6.76,10.51,1.52
+TaylorMade TP5X,98,7 Iron Mid,218.9,6.68,10.72,2
+TaylorMade TP5X,98,Driver Fast,792.5,18.85,16.25,1.24
+TaylorMade TP5X,98,Driver Mid,491.3,8.75,18.35,2.02
+TaylorMade TP5X,98,Wedge 35,0.51,0.32,0.66,0
+TaylorMade TP5X,98,Wedge Full (Dry),3.61,0.9,1.28,
+Titleist AVX,81,7 Iron Fast,138.2,6.62,8.38,1.12
+Titleist AVX,81,7 Iron Mid,197.1,5.33,12.25,1.03
+Titleist AVX,81,Driver Fast,498.3,13.82,12.54,1.38
+Titleist AVX,81,Driver Mid,430.4,10.82,14.39,1.31
+Titleist AVX,81,Wedge 35,0.54,0.3,0.64,
+Titleist AVX,81,Wedge Full (Dry),1.88,0.88,0.68,
+Titleist Pro V1,92,7 Iron Fast,105.6,8.61,3.94,1.34
+Titleist Pro V1,92,7 Iron Mid,401.6,9.52,13.84,1.37
+Titleist Pro V1,92,Driver Fast,322,9.92,10.34,0.85
+Titleist Pro V1,92,Driver Mid,470.5,10.82,14.11,1.04
+Titleist Pro V1,92,Wedge 35,0.43,0.24,0.57,
+Titleist Pro V1,92,Wedge Full (Dry),2.43,0.86,0.95,
+Titleist Pro V1x,102,7 Iron Fast,47.7,4.88,3.74,1.36
+Titleist Pro V1x,102,7 Iron Mid,278.8,8.88,10.18,1.77
+Titleist Pro V1x,102,Driver Fast,439,15.63,9.03,0.6
+Titleist Pro V1x,102,Driver Mid,498.9,11.85,13.97,0.65
+Titleist Pro V1x,102,Wedge 35,0.51,0.29,0.7,0
+Titleist Pro V1x,102,Wedge Full (Dry),3.33,1.39,0.88,
+Titleist Pro V1x Left Dash,105,7 Iron Fast,358.3,7.98,17.75,2.06
+Titleist Pro V1x Left Dash,105,7 Iron Mid,369.4,10,12.06,0.94
+Titleist Pro V1x Left Dash,105,Driver Fast,566.6,14.22,13.02,0.64
+Titleist Pro V1x Left Dash,105,Driver Mid,272,8.87,10.06,1.78
+Titleist Pro V1x Left Dash,105,Wedge 35,0.47,0.41,0.37,
+Titleist Pro V1x Left Dash,105,Wedge Full (Dry),2.51,0.59,1.35,
+Titleist Tour Soft,88,7 Iron Fast,235.6,8.69,9.24,0.63
+Titleist Tour Soft,88,7 Iron Mid,306,7.47,14.51,2
+Titleist Tour Soft,88,Driver Fast,313,16.26,6.38,0.73
+Titleist Tour Soft,88,Driver Mid,470.5,18.11,9.5,0.84
+Titleist Tour Soft,88,Wedge 35,0.42,0.29,0.49,
+Titleist Tour Soft,88,Wedge Full (Dry),5.93,1.25,1.57,
+Titleist TruFeel,70,7 Iron Fast,382.6,15.42,8.23,0.86
+Titleist TruFeel,70,7 Iron Mid,401.4,6.73,20.63,2.5
+Titleist TruFeel,70,Driver Fast,437,15.56,8.99,1.32
+Titleist TruFeel,70,Driver Mid,730.4,13.16,17.82,0.63
+Titleist TruFeel,70,Wedge 35,0.65,0.4,0.52,0
+Titleist TruFeel,70,Wedge Full (Dry),3.78,1.36,1.09,
+Titleist Velocity,90,7 Iron Fast,394.3,9.91,12.77,1.32
+Titleist Velocity,90,7 Iron Mid,316.7,6.41,15.74,1.8
+Titleist Velocity,90,Driver Fast,481.4,21.01,7.48,2.8
+Titleist Velocity,90,Driver Mid,822.3,17.67,15.86,2.43
+Titleist Velocity,90,Wedge 35,0.57,0.38,0.53,
+Titleist Velocity,90,Wedge Full (Dry),4.23,1.5,0.91,0
+Tour Edge Exotics,83,7 Iron Fast,89.3,6.2,4.64,1.22
+Tour Edge Exotics,83,7 Iron Mid,101.6,8.87,5.73,0.81
+Tour Edge Exotics,83,Driver Fast,902.8,11.8,24.39,2.19
+Tour Edge Exotics,83,Driver Mid,540.6,12,14.35,2.54
+Tour Edge Exotics,83,Wedge 35,0.4,0.34,0.37,0
+Tour Edge Exotics,83,Wedge Full (Dry),1.52,1.11,0.43,
+Vice Pro,89,7 Iron Fast,84.3,3.95,6.8,1.18
+Vice Pro,89,7 Iron Mid,576,11.19,16.96,1.42
+Vice Pro,89,Driver Fast,366.4,11.46,11.61,0.51
+Vice Pro,89,Driver Mid,166,9.41,9.98,0.99
+Vice Pro,89,Wedge 35,0.42,0.35,0.44,
+Vice Pro,89,Wedge Full (Dry),1.96,1.06,0.84,
+Vice Pro Air,72,7 Iron Fast,189.7,8.36,10.89,1.05
+Vice Pro Air,72,7 Iron Mid,294.4,8.57,11.95,1.92
+Vice Pro Air,72,Driver Fast,440.1,15.13,9.47,2.18
+Vice Pro Air,72,Driver Mid,494.8,12.27,12.87,1.69
+Vice Pro Air,72,Wedge 35,0.54,0.53,0.33,0
+Vice Pro Air,72,Wedge Full (Dry),4.73,1.61,1.13,
+Vice Pro Plus,97,7 Iron Fast,230.1,7.82,24.7,1.99
+Vice Pro Plus,97,7 Iron Mid,208.4,9.51,8.36,1.37
+Vice Pro Plus,97,Driver Fast,290.7,9.11,11.17,2.01
+Vice Pro Plus,97,Driver Mid,476.8,12.21,13.47,1.76
+Vice Pro Plus,97,Wedge 35,0.41,0.35,0.46,0
+Vice Pro Plus,97,Wedge Full (Dry),1.94,0.66,0.96,
+Vice Tour,98,7 Iron Fast,207.8,8.67,7.63,0.53
+Vice Tour,98,7 Iron Mid,255.6,6.84,11.91,1.08
+Vice Tour,98,Driver Fast,946.3,21.7,14.49,0.45
+Vice Tour,98,Driver Mid,472.6,12.86,12.01,1.93
+Vice Tour,98,Wedge 35,0.63,0.45,0.45,
+Vice Tour,98,Wedge Full (Dry),4.59,1.56,0.96,0
+Wilson Staff Model,94,7 Iron Fast,90.9,7.11,5.38,2
+Wilson Staff Model,94,7 Iron Mid,309.3,8.93,11.61,1.4
+Wilson Staff Model,94,Driver Fast,294,15.36,6.57,1.22
+Wilson Staff Model,94,Driver Mid,394.5,10.16,13.21,2
+Wilson Staff Model,94,Wedge 35,0.58,0.42,0.45,0
+Wilson Staff Model,94,Wedge Full (Dry),3.11,1.18,0.84,
+Wilson Staff Model X,102,7 Iron Fast,192.8,8.57,13.95,1.99
+Wilson Staff Model X,102,7 Iron Mid,375,9.65,14.58,1.2
+Wilson Staff Model X,102,Driver Fast,169.8,8.8,6.23,3.55
+Wilson Staff Model X,102,Driver Mid,424.4,9.73,13.99,0.87
+Wilson Staff Model X,102,Wedge 35,0.38,0.34,0.37,
+Wilson Staff Model X,102,Wedge Full (Dry),3.13,0.82,1.23,
+Wilson Triad,80,7 Iron Fast,147.8,5.63,9.39,1.4
+Wilson Triad,80,7 Iron Mid,314,7.04,16.42,1.62
+Wilson Triad,80,Driver Fast,708.9,19.12,12.03,1.72
+Wilson Triad,80,Driver Mid,388.3,14.32,9.28,2.24
+Wilson Triad,80,Wedge 35,0.36,0.38,0.34,0
+Wilson Triad,80,Wedge Full (Dry),2.83,1.09,0.83,

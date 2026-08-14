@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Ballz",
-  description: "Deployed via Claude Cowork -> GitHub -> Vercel",
+  title: "Ball Test Explorer",
+  description: "Compare golf balls by footprint, dispersion, curve, and compression",
 };
 
 export default function RootLayout({ children }) {
