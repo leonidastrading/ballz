@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BALLS } from "../lib/data";
 import { BALLS_2024 } from "../lib/data2024";
 import { BALLS_2025 } from "../lib/data2025";
+import { BALLS_MGS2025 } from "../lib/dataMgs2025";
 
 function colorsFor(balls) {
   const n = balls.length;
@@ -145,6 +146,42 @@ const SOURCES = [
     ],
     footerNote:
       "Data: Today's Golfer 2025 Robot Test — 62 balls, driver (78/93/114mph), 7-iron (80mph) & wedge (46mph). Carry/ball speed not measured on the wedge shot.",
+  },
+  {
+    id: "mygolfspy2025",
+    label: "2025 MyGolfSpy",
+    balls: BALLS_MGS2025,
+    conditions: [
+      { key: "Driver Fast", label: "Driver Fast" },
+      { key: "Driver Mid", label: "Driver Mid" },
+      { key: "Driver Slow", label: "Driver Slow" },
+      { key: "Mid Iron Fast", label: "Mid Iron Fast" },
+      { key: "Mid Iron Mid", label: "Mid Iron Mid" },
+      { key: "Mid Iron Slow", label: "Mid Iron Slow" },
+      { key: "Wedge 35", label: "Wedge 35 yd" },
+    ],
+    defaultCondition: "Driver Fast",
+    panels: [
+      { type: "bar", key: "carry", label: "Carry", unit: "(yd)", digits: 1, suffix: " yd" },
+      { type: "bar", key: "total", label: "Total Distance", unit: "(yd)", digits: 1, suffix: " yd" },
+      { type: "bar", key: "speed", label: "Ball Speed", unit: "(mph)", digits: 1, suffix: " mph" },
+      { type: "bar", key: "spin", label: "Spin", unit: "(rpm)", digits: 0, suffix: " rpm" },
+      { type: "bar", key: "launch", label: "Launch Angle", unit: "(°)", digits: 1, suffix: "°" },
+      { type: "bar", key: "descent", label: "Descent Angle", unit: "(°)", digits: 1, suffix: "°" },
+      { type: "bar", key: "height", label: "Max Height", unit: "(ft)", digits: 1, suffix: " ft" },
+      {
+        type: "bar",
+        key: "spinaxis",
+        label: "Spin Axis",
+        unit: "(° — negative = left, positive = right)",
+        digits: 2,
+        suffix: "°",
+        signed: true,
+      },
+    ],
+    ballLevelBars: [],
+    footerNote:
+      "Data: MyGolfSpy 2025 Ball Test — single-shot driver/mid-iron/wedge results, 44 balls (coverage varies by ball/condition).",
   },
 ];
 
@@ -457,7 +494,10 @@ export default function Home() {
             }
 
             // bar
-            const maxValue = Math.max(1, ...condData.map((d) => d[panel.key] || 0));
+            const maxValue = Math.max(
+              1,
+              ...condData.map((d) => (panel.signed ? Math.abs(d[panel.key] || 0) : d[panel.key] || 0))
+            );
             return (
               <section style={styles.panel} key={panel.key}>
                 <div style={styles.panelHeadRow}>
@@ -472,6 +512,7 @@ export default function Home() {
                   maxValue={maxValue}
                   digits={panel.digits ?? 1}
                   suffix={panel.suffix || ""}
+                  signed={!!panel.signed}
                 />
               </section>
             );
@@ -567,12 +608,15 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
   );
 }
 
-function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "" }) {
+function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = false }) {
   return (
     <div style={styles.barChart}>
       {data.map((d) => {
         const v = d[valueKey];
-        const widthPct = v == null ? 0 : Math.min(100, (v / maxValue) * 100);
+        const mag = v == null ? 0 : Math.abs(v);
+        const widthPct = v == null ? 0 : Math.min(100, (mag / maxValue) * 100);
+        const displayVal =
+          v == null ? "—" : `${signed && v > 0 ? "+" : ""}${fmt(v, digits)}${suffix}`;
         return (
           <div key={d.name} style={styles.barRow}>
             <div style={styles.barLabel}>{d.name}</div>
@@ -585,7 +629,7 @@ function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "" }) {
                 }}
               />
             </div>
-            <div style={styles.barValue}>{v == null ? "—" : `${fmt(v, digits)}${suffix}`}</div>
+            <div style={styles.barValue}>{displayVal}</div>
           </div>
         );
       })}
