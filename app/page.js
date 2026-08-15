@@ -267,6 +267,7 @@ export default function Home() {
   const [conditionBySource, setConditionBySource] = useState({});
   const [search, setSearch] = useState("");
   const [hydrated, setHydrated] = useState(false);
+  const [overlapCircles, setOverlapCircles] = useState(false);
   const [sortDir, setSortDir] = useState({
     wetdry_carry: "desc",
     wetdry_total: "desc",
@@ -493,47 +494,68 @@ export default function Home() {
                     <h2 style={styles.panelTitle}>
                       {panel.label} — {condition} <span style={styles.unit}>{panel.unit}</span>
                     </h2>
-                    <SortButton dir={dir} onClick={() => cycleSort(panel.key)} label={panel.label} />
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        style={{
+                          ...styles.smallBtn,
+                          ...(overlapCircles ? styles.smallBtnActive : {}),
+                        }}
+                        onClick={() => setOverlapCircles((v) => !v)}
+                      >
+                        {overlapCircles ? "Show side-by-side" : "Overlap circles"}
+                      </button>
+                      <SortButton dir={dir} onClick={() => cycleSort(panel.key)} label={panel.label} />
+                    </div>
                   </div>
-                  <div style={styles.circleRow}>
-                    {sorted.map((d) => {
-                      const val = d[panel.key];
-                      const r = CIRCLE_MAX_RADIUS * Math.sqrt((val || 0) / maxValue);
-                      const size = CIRCLE_MAX_RADIUS * 2 + 20;
-                      const patId = `avgPat-${panel.key}`;
-                      return (
-                        <div key={d.name} style={styles.circleCell}>
-                          <div style={styles.circleSvgWrap}>
-                            <svg viewBox={`0 0 ${size} ${size}`} width="100%" height="100%">
-                              {d.isAverage && <AverageStripeDefs id={patId} />}
-                              <circle
-                                cx={size / 2}
-                                cy={size / 2}
-                                r={Math.max(r, 2)}
-                                fill={d.isAverage ? `url(#${patId})` : d.color}
-                                fillOpacity={d.isAverage ? 0.85 : 0.35}
-                                stroke={d.isAverage ? "#eee" : d.color}
-                                strokeWidth="2"
-                              />
-                            </svg>
+                  {overlapCircles ? (
+                    <OverlapCircleChart
+                      data={sorted}
+                      valueKey={panel.key}
+                      maxValue={maxValue}
+                      digits={panel.digits ?? 1}
+                      valueSuffix={panel.valueSuffix || ""}
+                    />
+                  ) : (
+                    <div style={styles.circleRow}>
+                      {sorted.map((d) => {
+                        const val = d[panel.key];
+                        const r = CIRCLE_MAX_RADIUS * Math.sqrt((val || 0) / maxValue);
+                        const size = CIRCLE_MAX_RADIUS * 2 + 20;
+                        const patId = `avgPat-${panel.key}`;
+                        return (
+                          <div key={d.name} style={styles.circleCell}>
+                            <div style={styles.circleSvgWrap}>
+                              <svg viewBox={`0 0 ${size} ${size}`} width="100%" height="100%">
+                                {d.isAverage && <AverageStripeDefs id={patId} />}
+                                <circle
+                                  cx={size / 2}
+                                  cy={size / 2}
+                                  r={Math.max(r, 2)}
+                                  fill={d.isAverage ? `url(#${patId})` : d.color}
+                                  fillOpacity={d.isAverage ? 0.85 : 0.35}
+                                  stroke={d.isAverage ? "#eee" : d.color}
+                                  strokeWidth="2"
+                                />
+                              </svg>
+                            </div>
+                            <div
+                              style={
+                                d.isAverage
+                                  ? { ...styles.cellLabel, fontWeight: 700, fontStyle: "italic", color: "#eee" }
+                                  : styles.cellLabel
+                              }
+                            >
+                              {d.name}
+                            </div>
+                            <div style={styles.cellValue}>
+                              {fmt(val, panel.digits ?? 1)}
+                              {panel.valueSuffix || ""}
+                            </div>
                           </div>
-                          <div
-                            style={
-                              d.isAverage
-                                ? { ...styles.cellLabel, fontWeight: 700, fontStyle: "italic", color: "#eee" }
-                                : styles.cellLabel
-                            }
-                          >
-                            {d.name}
-                          </div>
-                          <div style={styles.cellValue}>
-                            {fmt(val, panel.digits ?? 1)}
-                            {panel.valueSuffix || ""}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </section>
               );
             }
@@ -771,6 +793,56 @@ function AverageStripeDefs({ id }) {
   );
 }
 
+function OverlapCircleChart({ data, valueKey, maxValue, digits = 1, valueSuffix = "" }) {
+  const MAX_R = 150;
+  const size = MAX_R * 2 + 24;
+  const patId = `avgPatOverlap-${valueKey}`;
+  const hasAvg = data.some((d) => d.isAverage);
+  // Draw largest first (bottom of stack) so smaller circles stay visible on top.
+  const drawOrder = [...data].sort((a, b) => (b[valueKey] || 0) - (a[valueKey] || 0));
+
+  return (
+    <div>
+      <div style={styles.overlapSvgWrap}>
+        <svg viewBox={`0 0 ${size} ${size}`} width="100%" height="100%" style={{ display: "block" }}>
+          {hasAvg && <AverageStripeDefs id={patId} />}
+          {drawOrder.map((d) => {
+            const val = d[valueKey];
+            if (val === null || val === undefined) return null;
+            const r = Math.max(MAX_R * Math.sqrt(val / maxValue), 3);
+            return (
+              <circle
+                key={d.name}
+                cx={size / 2}
+                cy={size / 2}
+                r={r}
+                fill={d.isAverage ? `url(#${patId})` : d.color}
+                fillOpacity={d.isAverage ? 0.6 : 0.3}
+                stroke={d.isAverage ? "#eee" : d.color}
+                strokeWidth="2"
+              >
+                <title>{`${d.name}: ${fmt(val, digits)}${valueSuffix}`}</title>
+              </circle>
+            );
+          })}
+        </svg>
+      </div>
+      <p style={styles.overlapHint}>Hover a circle to see which ball it is.</p>
+      <div style={styles.overlapLegend}>
+        {data.map((d) => (
+          <div key={d.name} style={styles.overlapLegendItem}>
+            <span style={{ ...styles.swatch, background: d.color, flex: "0 0 auto" }} />
+            <span style={d.isAverage ? styles.overlapLegendNameAvg : styles.overlapLegendName}>{d.name}</span>
+            <span style={styles.overlapLegendValue}>
+              {d[valueKey] == null ? "—" : `${fmt(d[valueKey], digits)}${valueSuffix}`}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = false }) {
   // With more than 2 bars, zoom the scale so the smallest value still reads as a
   // substantial bar (50%) instead of nearly-equal values all looking maxed out.
@@ -985,6 +1057,59 @@ const styles = {
     fontSize: 12,
     cursor: "pointer",
   },
+  smallBtnActive: {
+    background: "#1e2a4a",
+    color: "#9db8ff",
+    borderColor: "#2f5fd6",
+  },
+  overlapSvgWrap: {
+    width: "100%",
+    maxWidth: 320,
+    margin: "0 auto",
+    aspectRatio: "1 / 1",
+  },
+  overlapHint: {
+    textAlign: "center",
+    color: "#777",
+    fontSize: 11,
+    margin: "8px 0 14px",
+  },
+  overlapLegend: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+    gap: 6,
+  },
+  overlapLegendItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: 7,
+    background: "#1b1b1b",
+    border: "1px solid #2c2c2c",
+    borderRadius: 7,
+    padding: "5px 9px",
+    fontSize: 12,
+  },
+  overlapLegendName: {
+    color: "#ccc",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    flex: 1,
+  },
+  overlapLegendNameAvg: {
+    color: "#eee",
+    fontWeight: 700,
+    fontStyle: "italic",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    flex: 1,
+  },
+  overlapLegendValue: {
+    color: "#888",
+    fontSize: 11,
+    flex: "0 0 auto",
+  },
   sortBtn: {
     background: "#1b1b1b",
     color: "#9db8ff",
@@ -1078,6 +1203,10 @@ const styles = {
     textAlign: "center",
     marginTop: 4,
     lineHeight: 1.3,
+    minHeight: "3.9em",
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "center",
   },
   cellValue: { fontSize: 11, color: "#888" },
   errorChart: { display: "flex", flexDirection: "column", gap: 6 },
