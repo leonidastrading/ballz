@@ -199,6 +199,38 @@ const SOURCES = [
 
 const SOURCE_COLORS = Object.fromEntries(SOURCES.map((s) => [s.id, colorsFor(s.balls)]));
 
+// When more than this many balls are selected, add a synthetic "Average" entry
+// (striped black/white) to every chart so you can see how each ball compares
+// to the field average, treated just like any other ball.
+const AVERAGE_THRESHOLD = 5;
+const AVERAGE_STRIPE_CSS =
+  "repeating-linear-gradient(45deg, #0a0a0a 0px, #0a0a0a 6px, #f2f2f2 6px, #f2f2f2 12px)";
+
+function average(values) {
+  const nums = values.filter((v) => typeof v === "number" && !Number.isNaN(v));
+  if (!nums.length) return null;
+  return nums.reduce((a, b) => a + b, 0) / nums.length;
+}
+
+function withAverageEntry(items, excludeKeys) {
+  if (items.length <= AVERAGE_THRESHOLD) return items;
+  const keys = new Set();
+  items.forEach((it) =>
+    Object.keys(it).forEach((k) => {
+      if (!excludeKeys.includes(k)) keys.add(k);
+    })
+  );
+  const avgEntry = {
+    name: `Average (${items.length} balls)`,
+    color: AVERAGE_STRIPE_CSS,
+    isAverage: true,
+  };
+  keys.forEach((k) => {
+    avgEntry[k] = average(items.map((it) => it[k]));
+  });
+  return [...items, avgEntry];
+}
+
 function fmt(v, digits = 2) {
   if (v === null || v === undefined || Number.isNaN(v)) return "—";
   return v.toFixed(digits);
@@ -335,22 +367,24 @@ export default function Home() {
   }
 
   // ---- shared scales for the current condition, based on selected balls ----
-  const condData = selectedBalls.map((b) => ({
+  const condDataRaw = selectedBalls.map((b) => ({
     name: b.name,
     color: BALL_COLORS[b.name],
     meta: b.meta,
     compression: b.compression,
     ...b.conditions[condition],
   }));
+  const condData = withAverageEntry(condDataRaw, ["name", "color", "meta", "isAverage"]);
 
   const CIRCLE_MAX_RADIUS = 70; // px, for the largest footprint among selected
   const LINE_MAX_HALF = 220; // px, half-width for the largest spray/range among selected
 
-  const ballLevelData = selectedBalls.map((b) => ({
+  const ballLevelDataRaw = selectedBalls.map((b) => ({
     name: b.name,
     color: BALL_COLORS[b.name],
     ...Object.fromEntries((activeSource.ballLevelBars || []).map((bl) => [bl.key, b[bl.key]])),
   }));
+  const ballLevelData = withAverageEntry(ballLevelDataRaw, ["name", "color", "isAverage"]);
 
   return (
     <main style={styles.main}>
@@ -466,22 +500,32 @@ export default function Home() {
                       const val = d[panel.key];
                       const r = CIRCLE_MAX_RADIUS * Math.sqrt((val || 0) / maxValue);
                       const size = CIRCLE_MAX_RADIUS * 2 + 20;
+                      const patId = `avgPat-${panel.key}`;
                       return (
                         <div key={d.name} style={styles.circleCell}>
                           <div style={styles.circleSvgWrap}>
                             <svg viewBox={`0 0 ${size} ${size}`} width="100%" height="100%">
+                              {d.isAverage && <AverageStripeDefs id={patId} />}
                               <circle
                                 cx={size / 2}
                                 cy={size / 2}
                                 r={Math.max(r, 2)}
-                                fill={d.color}
-                                fillOpacity="0.35"
-                                stroke={d.color}
+                                fill={d.isAverage ? `url(#${patId})` : d.color}
+                                fillOpacity={d.isAverage ? 0.85 : 0.35}
+                                stroke={d.isAverage ? "#eee" : d.color}
                                 strokeWidth="2"
                               />
                             </svg>
                           </div>
-                          <div style={styles.cellLabel}>{d.name}</div>
+                          <div
+                            style={
+                              d.isAverage
+                                ? { ...styles.cellLabel, fontWeight: 700, fontStyle: "italic", color: "#eee" }
+                                : styles.cellLabel
+                            }
+                          >
+                            {d.name}
+                          </div>
                           <div style={styles.cellValue}>
                             {fmt(val, panel.digits ?? 1)}
                             {panel.valueSuffix || ""}
@@ -591,7 +635,7 @@ export default function Home() {
           {activeSource.wedgeWetDryPanels.map((panel) => {
             const sortKey = `wetdry_${panel.key}`;
             const dir = sortDir[sortKey] || null;
-            const raw = selectedBalls.map((b) => {
+            const rawBase = selectedBalls.map((b) => {
               const entry = activeSource.wedgeWetDryData[b.name] || {};
               const dry = entry.dry ? entry.dry[panel.key] ?? null : null;
               const wet = entry.wet ? entry.wet[panel.key] ?? null : null;
@@ -604,6 +648,7 @@ export default function Home() {
                 sortval: delta,
               };
             });
+            const raw = withAverageEntry(rawBase, ["name", "color", "isAverage"]);
             const sorted = sortByKey(raw, "sortval", dir);
             const vals = raw.flatMap((d) => [d.dry, d.wet]).filter((v) => v !== null && v !== undefined);
             let domainMin = vals.length ? Math.min(...vals) : 0;
@@ -653,9 +698,19 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
         const hasVal = raw !== null && raw !== undefined;
         const v = hasVal ? raw : 0;
         const halfPx = maxHalfWidth * (v / maxValue);
+        const patId = `avgPatLine-${valueKey}`;
+        const strokeColor = d.isAverage ? `url(#${patId})` : d.color;
         return (
           <div key={d.name} style={styles.errorRow}>
-            <div style={styles.errorLabel}>{d.name}</div>
+            <div
+              style={
+                d.isAverage
+                  ? { ...styles.errorLabel, fontWeight: 700, fontStyle: "italic", color: "#eee" }
+                  : styles.errorLabel
+              }
+            >
+              {d.name}
+            </div>
             <div style={styles.errorTrack}>
               <div style={styles.errorCenterLine} />
               <svg
@@ -665,6 +720,7 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
                 preserveAspectRatio="none"
                 style={{ display: "block" }}
               >
+                {d.isAverage && <AverageStripeDefs id={patId} />}
                 {hasVal && (
                   <>
                     <line
@@ -672,7 +728,7 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
                       y1="12"
                       x2={maxHalfWidth + 10 + halfPx}
                       y2="12"
-                      stroke={d.color}
+                      stroke={strokeColor}
                       strokeWidth="3"
                     />
                     <line
@@ -680,7 +736,7 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
                       y1="4"
                       x2={maxHalfWidth + 10 - halfPx}
                       y2="20"
-                      stroke={d.color}
+                      stroke={strokeColor}
                       strokeWidth="3"
                     />
                     <line
@@ -688,7 +744,7 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
                       y1="4"
                       x2={maxHalfWidth + 10 + halfPx}
                       y2="20"
-                      stroke={d.color}
+                      stroke={strokeColor}
                       strokeWidth="3"
                     />
                   </>
@@ -701,6 +757,17 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
         );
       })}
     </div>
+  );
+}
+
+function AverageStripeDefs({ id }) {
+  return (
+    <defs>
+      <pattern id={id} width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <rect width="8" height="8" fill="#0a0a0a" />
+        <rect width="4" height="8" fill="#f2f2f2" />
+      </pattern>
+    </defs>
   );
 }
 
@@ -732,7 +799,15 @@ function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = 
           v == null ? "—" : `${signed && v > 0 ? "+" : ""}${fmt(v, digits)}${suffix}`;
         return (
           <div key={d.name} style={styles.barRow}>
-            <div style={styles.barLabel}>{d.name}</div>
+            <div
+              style={
+                d.isAverage
+                  ? { ...styles.barLabel, fontWeight: 700, fontStyle: "italic", color: "#eee" }
+                  : styles.barLabel
+              }
+            >
+              {d.name}
+            </div>
             <div style={styles.barTrack}>
               <div
                 style={{
@@ -765,7 +840,15 @@ function RangeBarChart({ data, domainMin, domainMax, digits = 1, suffix = "" }) 
         const bandWidth = lo !== null ? Math.max(hi - lo, 1.2) : null;
         return (
           <div key={d.name} style={styles.barRow}>
-            <div style={styles.barLabel}>{d.name}</div>
+            <div
+              style={
+                d.isAverage
+                  ? { ...styles.barLabel, fontWeight: 700, fontStyle: "italic", color: "#eee" }
+                  : styles.barLabel
+              }
+            >
+              {d.name}
+            </div>
             <div style={styles.barTrack}>
               {lo !== null && (
                 <div
