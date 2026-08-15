@@ -724,17 +724,15 @@ export default function Home() {
                 <div style={styles.panelHeadRow}>
                   <h2 style={styles.panelTitle}>
                     {panel.label} — {condition} <span style={styles.unit}>{panel.unit}</span>
-                    {colorNameByCover && (
-                      <span
-                        style={styles.coverInfoIcon}
-                        title="Ball name color (driver Carry/Total only): slightly blue = Urethane cover, slightly red = Ionomer cover."
-                      >
-                        ⓘ
-                      </span>
-                    )}
                   </h2>
                   <SortButton dir={dir} onClick={() => cycleSort(panel.key)} label={panel.label} />
                 </div>
+                {colorNameByCover && (
+                  <p style={styles.coverInfoText}>
+                    Ball name color: <span style={{ color: "#a9c6f5" }}>slightly blue = Urethane cover</span>,{" "}
+                    <span style={{ color: "#f2a9a9" }}>slightly red = Ionomer cover</span>.
+                  </p>
+                )}
                 <BarPanel
                   data={sorted}
                   valueKey={panel.key}
@@ -1412,12 +1410,10 @@ const styles = {
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
   },
-  coverInfoIcon: {
-    marginLeft: 6,
-    fontSize: 12,
-    color: "#888",
-    cursor: "help",
-    fontStyle: "normal",
+  coverInfoText: {
+    fontSize: 11.5,
+    color: "#999",
+    margin: "-4px 0 10px",
   },
   barTrack: {
     background: "#0f0f0f",
