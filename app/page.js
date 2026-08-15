@@ -339,6 +339,65 @@ function withAverageEntry(items, excludeKeys) {
   return [...items, avgEntry];
 }
 
+// Builds a plain-text summary of exactly what's currently on screen (tab, condition,
+// selected balls and their stats) so the chat assistant answers from the same data
+// the user is looking at, instead of guessing.
+function buildBallContext(activeSource, condition, selectedBalls) {
+  if (!selectedBalls || selectedBalls.length === 0) {
+    return `Tab: ${activeSource.label}\nNo balls are currently selected.`;
+  }
+
+  const lines = [];
+  lines.push(`Tab: ${activeSource.label}`);
+  lines.push(`Current condition: ${condition}`);
+  lines.push(`Selected balls (${selectedBalls.length}):`);
+
+  selectedBalls.forEach((b) => {
+    const coverText = coverLabel(b.cover) || b.cover || "unknown";
+    const condVals = b.conditions ? b.conditions[condition] : null;
+    const metricParts = (activeSource.panels || [])
+      .map((p) => {
+        const v = condVals ? condVals[p.key] : undefined;
+        if (v === null || v === undefined) return null;
+        return `${p.label} ${fmt(v, p.digits ?? 1)}${p.suffix || ""}`;
+      })
+      .filter(Boolean);
+    const ballLevelParts = (activeSource.ballLevelBars || [])
+      .map((bl) => {
+        const v = b[bl.key];
+        if (v === null || v === undefined) return null;
+        return `${bl.label} ${fmt(v, bl.digits ?? 1)}${bl.suffix || ""}`;
+      })
+      .filter(Boolean);
+    lines.push(
+      `- ${b.name} (cover: ${coverText})${metricParts.length ? "; " + metricParts.join(", ") : ""}${
+        ballLevelParts.length ? "; " + ballLevelParts.join(", ") : ""
+      }`
+    );
+  });
+
+  if (activeSource.wedgeWetDryData && condition === activeSource.wedgeWetDryCondition) {
+    lines.push("Wedge Full wet-vs-dry data for selected balls:");
+    selectedBalls.forEach((b) => {
+      const entry = activeSource.wedgeWetDryData[b.name];
+      if (!entry) return;
+      const dryParts = entry.dry
+        ? Object.entries(entry.dry)
+            .map(([k, v]) => (v == null ? null : `${k} ${fmt(v, 1)} (dry)`))
+            .filter(Boolean)
+        : [];
+      const wetParts = entry.wet
+        ? Object.entries(entry.wet)
+            .map(([k, v]) => (v == null ? null : `${k} ${fmt(v, 1)} (wet)`))
+            .filter(Boolean)
+        : [];
+      lines.push(`- ${b.name}: ${[...dryParts, ...wetParts].join(", ")}`);
+    });
+  }
+
+  return lines.join("\n");
+}
+
 function fmt(v, digits = 2) {
   if (v === null || v === undefined || Number.isNaN(v)) return "—";
   return v.toFixed(digits);
@@ -376,6 +435,126 @@ function sortByKey(arr, key, dir) {
     return dir === "asc" ? av - bv : bv - av;
   });
   return copy;
+}
+
+function BallChat({ tabId, tabLabel, contextText }) {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  async function send() {
+    const question = input.trim();
+    if (!question || loading) return;
+    const nextMessages = [...messages, { role: "user", content: question }];
+    setMessages(nextMessages);
+    setInput("");
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ messages: nextMessages, context: contextText }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setError(data.error || `Request failed (${res.status}).`);
+      } else {
+        setMessages((prev) => [...prev, { role: "assistant", content: data.text }]);
+      }
+    } catch (e) {
+      setError(`Request failed: ${String(e)}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function onKeyDown(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  }
+
+  return (
+    <section style={styles.panel}>
+      <div style={styles.panelHeadRow}>
+        <h2 style={styles.panelTitle}>
+          Ask AI about {tabLabel} <span style={styles.unit}>(uses the balls/condition selected above)</span>
+        </h2>
+        {messages.length > 0 && (
+          <button style={styles.smallBtn} onClick={() => setMessages([])}>
+            Clear chat
+          </button>
+        )}
+      </div>
+
+      {messages.length > 0 && (
+        <div style={styles.chatLog}>
+          {messages.map((m, i) => (
+            <div
+              key={i}
+              style={m.role === "user" ? styles.chatBubbleUser : styles.chatBubbleAssistant}
+            >
+              <strong style={styles.chatRoleLabel}>{m.role === "user" ? "You" : "AI"}</strong>
+              <div style={styles.chatBubbleText}>{m.content}</div>
+            </div>
+          ))}
+          {loading && <div style={styles.chatThinking}>AI is thinking…</div>}
+        </div>
+      )}
+
+      {error && <p style={styles.chatError}>{error}</p>}
+
+      <div style={styles.chatInputRow}>
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={onKeyDown}
+          placeholder={'Ask about the balls selected above, e.g. which of these spins the least off the driver?'}
+          style={styles.chatInput}
+          rows={2}
+        />
+        <button
+          onClick={send}
+          disabled={loading || !input.trim()}
+          style={{
+            ...styles.smallBtn,
+            ...(loading || !input.trim() ? styles.smallBtnDisabled : {}),
+          }}
+        >
+          {loading ? "…" : "Send"}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function ScrollToTopButton() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    function onScroll() {
+      setVisible(window.scrollY > 400);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      style={styles.scrollTopBtn}
+      aria-label="Scroll to top"
+      title="Scroll to top"
+    >
+      ↑ Top
+    </button>
+  );
 }
 
 function SortButton({ dir, onClick, label }) {
@@ -609,6 +788,13 @@ export default function Home() {
           })}
         </div>
       </section>
+
+      <BallChat
+        key={activeSource.id}
+        tabId={activeSource.id}
+        tabLabel={activeSource.label}
+        contextText={buildBallContext(activeSource, condition, selectedBalls)}
+      />
 
       {selectedBalls.length === 0 ? (
         <section style={styles.panel}>
@@ -868,6 +1054,7 @@ export default function Home() {
       )}
 
       <footer style={styles.footer}>{activeSource.footerNote}</footer>
+      <ScrollToTopButton />
     </main>
   );
 }
@@ -1153,6 +1340,21 @@ function RangeBarChart({ data, domainMin, domainMax, digits = 1, suffix = "", co
 }
 
 const styles = {
+  scrollTopBtn: {
+    position: "fixed",
+    bottom: 22,
+    right: 22,
+    zIndex: 50,
+    background: "#1f4e78",
+    color: "#fff",
+    border: "1px solid #3a7ab5",
+    borderRadius: 999,
+    padding: "10px 16px",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    boxShadow: "0 4px 14px rgba(0,0,0,0.5)",
+  },
   main: {
     minHeight: "100vh",
     background: "#000000",
@@ -1242,6 +1444,76 @@ const styles = {
     background: "#1e2a4a",
     color: "#9db8ff",
     borderColor: "#2f5fd6",
+  },
+  smallBtnDisabled: {
+    opacity: 0.5,
+    cursor: "not-allowed",
+  },
+  chatLog: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+    maxHeight: 360,
+    overflowY: "auto",
+    marginBottom: 12,
+    paddingRight: 4,
+  },
+  chatBubbleUser: {
+    alignSelf: "flex-end",
+    maxWidth: "85%",
+    background: "#1e2a4a",
+    border: "1px solid #2f5fd6",
+    borderRadius: 10,
+    padding: "8px 12px",
+  },
+  chatBubbleAssistant: {
+    alignSelf: "flex-start",
+    maxWidth: "85%",
+    background: "#1a1a1a",
+    border: "1px solid #333",
+    borderRadius: 10,
+    padding: "8px 12px",
+  },
+  chatRoleLabel: {
+    display: "block",
+    fontSize: 10.5,
+    color: "#888",
+    marginBottom: 3,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  chatBubbleText: {
+    fontSize: 13.5,
+    color: "#e6e6e6",
+    whiteSpace: "pre-wrap",
+    lineHeight: 1.45,
+  },
+  chatThinking: {
+    fontSize: 12.5,
+    color: "#888",
+    fontStyle: "italic",
+    padding: "2px 4px",
+  },
+  chatError: {
+    fontSize: 12.5,
+    color: "#f2a9a9",
+    marginBottom: 10,
+  },
+  chatInputRow: {
+    display: "flex",
+    gap: 8,
+    alignItems: "flex-end",
+  },
+  chatInput: {
+    flex: 1,
+    background: "#0f0f0f",
+    border: "1px solid #333",
+    borderRadius: 8,
+    color: "#e6e6e6",
+    padding: "8px 10px",
+    fontSize: 13.5,
+    fontFamily: "inherit",
+    resize: "vertical",
   },
   overlapSvgWrap: {
     width: "100%",
