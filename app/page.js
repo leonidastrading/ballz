@@ -344,6 +344,18 @@ function fmt(v, digits = 2) {
   return v.toFixed(digits);
 }
 
+// Normalizes a ball's cover-material string down to "Urethane" or "Ionomer"
+// for the small caption shown under each ball on spin panels. Surlyn (incl.
+// "Du Pont Surlyn") is an ionomer resin, so it's grouped under Ionomer.
+// Returns null when the material isn't known/recognized, so nothing renders.
+function coverLabel(cover) {
+  if (!cover) return null;
+  const c = cover.toLowerCase();
+  if (c.includes("urethane")) return "Urethane";
+  if (c.includes("ionomer") || c.includes("surlyn")) return "Ionomer";
+  return null;
+}
+
 function sortByKey(arr, key, dir) {
   if (!dir) return arr;
   const copy = [...arr];
@@ -481,6 +493,7 @@ export default function Home() {
     color: BALL_COLORS[b.name],
     meta: b.meta,
     compression: b.compression,
+    cover: b.cover,
     ...b.conditions[condition],
   }));
   const condData = withAverageEntry(condDataRaw, ["name", "color", "meta", "isAverage"]);
@@ -709,6 +722,7 @@ export default function Home() {
                   digits={panel.digits ?? 1}
                   suffix={panel.suffix || ""}
                   signed={!!panel.signed}
+                  showCover={panel.key === "spin"}
                 />
               </section>
             );
@@ -951,7 +965,7 @@ function OverlapCircleChart({ data, valueKey, maxValue, digits = 1, valueSuffix 
   );
 }
 
-function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = false }) {
+function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = false, showCover = false }) {
   // With more than 2 bars, zoom the scale so the smallest value still reads as a
   // substantial bar (50%) instead of nearly-equal values all looking maxed out.
   const mags = data
@@ -977,16 +991,20 @@ function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = 
         }
         const displayVal =
           v == null ? "—" : `${signed && v > 0 ? "+" : ""}${fmt(v, digits)}${suffix}`;
+        const cover = showCover ? coverLabel(d.cover) : null;
         return (
           <div key={d.name} style={styles.barRow}>
-            <div
-              style={
-                d.isAverage
-                  ? { ...styles.barLabel, fontWeight: 700, fontStyle: "italic", color: "#eee" }
-                  : styles.barLabel
-              }
-            >
-              {d.name}
+            <div style={styles.barLabelWrap}>
+              <div
+                style={
+                  d.isAverage
+                    ? { ...styles.barLabel, fontWeight: 700, fontStyle: "italic", color: "#eee" }
+                    : styles.barLabel
+                }
+              >
+                {d.name}
+              </div>
+              {cover && <div style={styles.barCoverLabel}>{cover}</div>}
             </div>
             <div style={styles.barTrack}>
               <div
@@ -1348,9 +1366,24 @@ const styles = {
     alignItems: "center",
     gap: 10,
   },
+  barLabelWrap: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    minWidth: 0,
+  },
   barLabel: {
     fontSize: 12.5,
     color: "#ccc",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+  barCoverLabel: {
+    fontSize: 9.5,
+    color: "#787878",
+    fontStyle: "italic",
+    marginTop: 1,
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
