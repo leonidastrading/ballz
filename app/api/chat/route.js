@@ -1,7 +1,7 @@
 export const runtime = "nodejs";
 
-const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-const MODEL = "gpt-4o-mini";
+const MODEL = "gemini-2.5-flash";
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
 export async function POST(req) {
   let body;
@@ -16,12 +16,12 @@ export async function POST(req) {
     return Response.json({ error: "No messages provided." }, { status: 400 });
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return Response.json(
       {
         error:
-          "OPENAI_API_KEY is not set on the server. Add it in Vercel -> Project Settings -> Environment Variables, then redeploy.",
+          "GEMINI_API_KEY is not set on the server. Add it in Vercel -> Project Settings -> Environment Variables, then redeploy.",
       },
       { status: 500 }
     );
@@ -34,33 +34,35 @@ Answer questions using ONLY the data provided below, which reflects exactly what
 Current on-screen data:
 ${context || "(no balls are currently selected)"}`;
 
+  // Gemini uses "user" / "model" roles (not "assistant"), and takes the system
+  // prompt as a separate field rather than a message in the array.
+  const contents = messages.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
+  }));
+
   try {
-    const res = await fetch(OPENAI_URL, {
+    const res = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${apiKey}`,
-      },
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 700,
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages.map((m) => ({ role: m.role, content: m.content })),
-        ],
+        contents,
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        generationConfig: { maxOutputTokens: 700 },
       }),
     });
 
     if (!res.ok) {
       const errText = await res.text();
       return Response.json(
-        { error: `OpenAI API error (${res.status}): ${errText.slice(0, 500)}` },
+        { error: `Gemini API error (${res.status}): ${errText.slice(0, 500)}` },
         { status: 502 }
       );
     }
 
     const data = await res.json();
-    const text = data?.choices?.[0]?.message?.content?.trim();
+    const parts = data?.candidates?.[0]?.content?.parts || [];
+    const text = parts.map((p) => p.text || "").join("").trim();
     return Response.json({ text: text || "(no response)" });
   } catch (e) {
     return Response.json({ error: `Request failed: ${String(e)}` }, { status: 500 });
