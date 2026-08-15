@@ -48,7 +48,14 @@ ${context || "(no balls are currently selected)"}`;
       body: JSON.stringify({
         contents,
         systemInstruction: { parts: [{ text: systemPrompt }] },
-        generationConfig: { maxOutputTokens: 700 },
+        // gemini-2.5-flash spends part of maxOutputTokens on internal "thinking" by
+        // default, which was eating the whole budget and truncating the visible
+        // answer. Disable thinking (this is a quick data-lookup assistant, not a
+        // reasoning task) and give plenty of headroom for the real answer.
+        generationConfig: {
+          maxOutputTokens: 1536,
+          thinkingConfig: { thinkingBudget: 0 },
+        },
       }),
     });
 
@@ -61,9 +68,17 @@ ${context || "(no balls are currently selected)"}`;
     }
 
     const data = await res.json();
-    const parts = data?.candidates?.[0]?.content?.parts || [];
+    const candidate = data?.candidates?.[0];
+    const parts = candidate?.content?.parts || [];
     const text = parts.map((p) => p.text || "").join("").trim();
-    return Response.json({ text: text || "(no response)" });
+    if (!text) {
+      const reason = candidate?.finishReason || "unknown";
+      return Response.json(
+        { error: `Gemini returned no text (finishReason: ${reason}). Try asking again.` },
+        { status: 502 }
+      );
+    }
+    return Response.json({ text });
   } catch (e) {
     return Response.json({ error: `Request failed: ${String(e)}` }, { status: 500 });
   }
