@@ -503,12 +503,34 @@ function ScatterPlot({ availableFields, data }) {
     const toPx = (x) => PAD + ((x - xMin) / (xMax - xMin)) * (W - PAD * 2);
     const toPy = (y) => H - PAD - ((y - yMin) / (yMax - yMin)) * (H - PAD * 2);
 
+    const TICK_COUNT = 5;
+    const xTicks = Array.from({ length: TICK_COUNT }, (_, i) => xMin + ((xMax - xMin) * i) / (TICK_COUNT - 1));
+    const yTicks = Array.from({ length: TICK_COUNT }, (_, i) => yMin + ((yMax - yMin) * i) / (TICK_COUNT - 1));
+
     body = (
       <>
         <div style={styles.scatterSvgWrap}>
           <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
             <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="#3a3a3a" strokeWidth="1" />
             <line x1={PAD} y1={PAD} x2={PAD} y2={H - PAD} stroke="#3a3a3a" strokeWidth="1" />
+            {xTicks.map((tv, i) => (
+              <g key={`xt-${i}`}>
+                <line x1={toPx(tv)} y1={H - PAD} x2={toPx(tv)} y2={H - PAD + 5} stroke="#3a3a3a" strokeWidth="1" />
+                <text x={toPx(tv)} y={H - PAD + 18} textAnchor="middle" fontSize="10.5" fill="#888">
+                  {fmt(tv, xField?.digits ?? 1)}
+                  {xField?.suffix || ""}
+                </text>
+              </g>
+            ))}
+            {yTicks.map((tv, i) => (
+              <g key={`yt-${i}`}>
+                <line x1={PAD - 5} y1={toPy(tv)} x2={PAD} y2={toPy(tv)} stroke="#3a3a3a" strokeWidth="1" />
+                <text x={PAD - 9} y={toPy(tv) + 3.5} textAnchor="end" fontSize="10.5" fill="#888">
+                  {fmt(tv, yField?.digits ?? 1)}
+                  {yField?.suffix || ""}
+                </text>
+              </g>
+            ))}
             {trend && (
               <line
                 x1={toPx(xMin)}
@@ -537,11 +559,11 @@ function ScatterPlot({ availableFields, data }) {
                 />
               );
             })}
-            <text x={W / 2} y={H - 12} textAnchor="middle" fontSize="13" fill="#999">
+            <text x={W / 2} y={H - 6} textAnchor="middle" fontSize="13" fill="#999">
               {xField?.label}
               {xField?.suffix}
             </text>
-            <text x={18} y={H / 2} textAnchor="middle" fontSize="13" fill="#999" transform={`rotate(-90 18 ${H / 2})`}>
+            <text x={14} y={H / 2} textAnchor="middle" fontSize="13" fill="#999" transform={`rotate(-90 14 ${H / 2})`}>
               {yField?.label}
               {yField?.suffix}
             </text>
