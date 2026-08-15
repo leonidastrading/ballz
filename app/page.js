@@ -576,6 +576,7 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const [overlapCircles, setOverlapCircles] = useState(false);
+  const [circleAsBar, setCircleAsBar] = useState(true); // bars are the default view for "circle" panels
   const [sortDir, setSortDir] = useState({
     wetdry_carry: "desc",
     wetdry_total: "desc",
@@ -820,16 +821,36 @@ export default function Home() {
                       <button
                         style={{
                           ...styles.smallBtn,
-                          ...(overlapCircles ? styles.smallBtnActive : {}),
+                          ...(!circleAsBar ? styles.smallBtnActive : {}),
                         }}
-                        onClick={() => setOverlapCircles((v) => !v)}
+                        onClick={() => setCircleAsBar((v) => !v)}
                       >
-                        {overlapCircles ? "Show side-by-side" : "Overlap circles"}
+                        {circleAsBar ? "Show as circles" : "Show as bars"}
                       </button>
+                      {!circleAsBar && (
+                        <button
+                          style={{
+                            ...styles.smallBtn,
+                            ...(overlapCircles ? styles.smallBtnActive : {}),
+                          }}
+                          onClick={() => setOverlapCircles((v) => !v)}
+                        >
+                          {overlapCircles ? "Show side-by-side" : "Overlap circles"}
+                        </button>
+                      )}
                       <SortButton dir={dir} onClick={() => cycleSort(panel.key)} label={panel.label} />
                     </div>
                   </div>
-                  {overlapCircles ? (
+                  {circleAsBar ? (
+                    <BarPanel
+                      data={sorted}
+                      valueKey={panel.key}
+                      maxValue={maxValue}
+                      digits={panel.digits ?? 1}
+                      suffix={panel.valueSuffix || ""}
+                      colorNameByCover
+                    />
+                  ) : overlapCircles ? (
                     <OverlapCircleChart
                       data={sorted}
                       valueKey={panel.key}
