@@ -440,257 +440,149 @@ function sortByKey(arr, key, dir) {
 function ScatterPlot({ availableFields, data }) {
   const [xKey, setXKey] = useState(availableFields[0]?.key || "");
   const [yKey, setYKey] = useState(availableFields[1]?.key || availableFields[0]?.key || "");
-  const [zKey, setZKey] = useState(availableFields[2]?.key || availableFields[0]?.key || "");
   const [hover, setHover] = useState(null);
-  const [rot, setRot] = useState({ rx: -0.38, ry: 0.62 });
-  const dragRef = useRef(null);
 
   const xField = availableFields.find((f) => f.key === xKey) || availableFields[0];
   const yField = availableFields.find((f) => f.key === yKey) || availableFields[0];
-  const zField = availableFields.find((f) => f.key === zKey) || availableFields[0];
 
   const points = data
     .filter((d) => !d.isAverage)
-    .map((d) => ({ name: d.name, color: d.color, x: d[xKey], y: d[yKey], z: d[zKey] }))
+    .map((d) => ({ name: d.name, color: d.color, x: d[xKey], y: d[yKey] }))
     .filter(
-      (p) =>
-        p.x !== null &&
-        p.x !== undefined &&
-        p.y !== null &&
-        p.y !== undefined &&
-        p.z !== null &&
-        p.z !== undefined &&
-        !Number.isNaN(p.x) &&
-        !Number.isNaN(p.y) &&
-        !Number.isNaN(p.z)
+      (p) => p.x !== null && p.x !== undefined && p.y !== null && p.y !== undefined && !Number.isNaN(p.x) && !Number.isNaN(p.y)
     );
 
   const W = 900;
-  const H = 560;
-  const CX = W / 2;
-  const CY = H / 2 + 6;
-  const SCALE = 190;
-
-  function onPointerDown(e) {
-    dragRef.current = { x: e.clientX, y: e.clientY, rx: rot.rx, ry: rot.ry };
-    e.currentTarget.setPointerCapture && e.currentTarget.setPointerCapture(e.pointerId);
-  }
-  function onPointerMove(e) {
-    if (!dragRef.current) return;
-    const dx = e.clientX - dragRef.current.x;
-    const dy = e.clientY - dragRef.current.y;
-    let nrx = dragRef.current.rx - dy * 0.01;
-    let nry = dragRef.current.ry + dx * 0.01;
-    nrx = Math.max(-1.45, Math.min(1.45, nrx));
-    setRot({ rx: nrx, ry: nry });
-  }
-  function onPointerUp() {
-    dragRef.current = null;
-  }
+  const H = 540;
+  const PAD = 54;
 
   let body;
   if (points.length === 0) {
     body = (
       <p style={{ color: "#888", textAlign: "center", padding: "24px 0" }}>
-        Select balls with data for all three axes to see a 3D scatter plot.
+        Select balls with data for both axes to see a scatter plot.
       </p>
     );
   } else {
-    const rangeOf = (vals) => {
-      let mn = Math.min(...vals);
-      let mx = Math.max(...vals);
-      if (mn === mx) {
-        mn -= 1;
-        mx += 1;
-      }
-      const pad = (mx - mn) * 0.1;
-      return [mn - pad, mx + pad];
-    };
-    const [xMin, xMax] = rangeOf(points.map((p) => p.x));
-    const [yMin, yMax] = rangeOf(points.map((p) => p.y));
-    const [zMin, zMax] = rangeOf(points.map((p) => p.z));
-
-    const norm = (v, mn, mx) => ((v - mn) / (mx - mn)) * 2 - 1;
-
-    const cosY = Math.cos(rot.ry);
-    const sinY = Math.sin(rot.ry);
-    const cosX = Math.cos(rot.rx);
-    const sinX = Math.sin(rot.rx);
-
-    // nx = along X axis, ny = along Y axis (vertical), nz = along Z axis (depth)
-    function project(nx, ny, nz) {
-      const x1 = nx * cosY + nz * sinY;
-      const z1 = -nx * sinY + nz * cosY;
-      const y1 = ny;
-      const y2 = y1 * cosX - z1 * sinX;
-      const z2 = y1 * sinX + z1 * cosX;
-      const x2 = x1;
-      return { sx: CX + x2 * SCALE, sy: CY - y2 * SCALE, depth: z2 };
+    const xs = points.map((p) => p.x);
+    const ys = points.map((p) => p.y);
+    let xMin = Math.min(...xs);
+    let xMax = Math.max(...xs);
+    let yMin = Math.min(...ys);
+    let yMax = Math.max(...ys);
+    if (xMin === xMax) {
+      xMin -= 1;
+      xMax += 1;
     }
-
-    const projected = points
-      .map((p) => {
-        const nx = norm(p.x, xMin, xMax);
-        const ny = norm(p.y, yMin, yMax);
-        const nz = norm(p.z, zMin, zMax);
-        const pr = project(nx, ny, nz);
-        return { ...p, nx, ny, nz, ...pr };
-      })
-      .sort((a, b) => a.depth - b.depth);
-
-    // ---- regression plane fit: z(normalized) = a + b*x(normalized) + c*y(normalized) ----
-    let plane = null;
-    if (points.length >= 3) {
-      const n = points.length;
-      let sX = 0,
-        sY = 0,
-        sZ = 0,
-        sXX = 0,
-        sYY = 0,
-        sXY = 0,
-        sXZ = 0,
-        sYZ = 0;
-      projected.forEach((p) => {
-        sX += p.nx;
-        sY += p.ny;
-        sZ += p.nz;
-        sXX += p.nx * p.nx;
-        sYY += p.ny * p.ny;
-        sXY += p.nx * p.ny;
-        sXZ += p.nx * p.nz;
-        sYZ += p.ny * p.nz;
-      });
-      // solve [n sX sY; sX sXX sXY; sY sXY sYY] [a b c]^T = [sZ sXZ sYZ]^T via Cramer's rule
-      const A = [
-        [n, sX, sY],
-        [sX, sXX, sXY],
-        [sY, sXY, sYY],
-      ];
-      const Bv = [sZ, sXZ, sYZ];
-      const det3 = (m) =>
-        m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
-        m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
-        m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
-      const D = det3(A);
-      if (Math.abs(D) > 1e-9) {
-        const withCol = (col) => A.map((row, i) => row.map((v, j) => (j === col ? Bv[i] : v)));
-        const a = det3(withCol(0)) / D;
-        const b = det3(withCol(1)) / D;
-        const c = det3(withCol(2)) / D;
-        plane = { a, b, c };
-      }
+    if (yMin === yMax) {
+      yMin -= 1;
+      yMax += 1;
     }
+    const xPad = (xMax - xMin) * 0.12;
+    const yPad = (yMax - yMin) * 0.12;
+    xMin -= xPad;
+    xMax += xPad;
+    yMin -= yPad;
+    yMax += yPad;
 
-    const AX_EXT = 1.28;
-    const axisEnds = {
-      x: [project(-AX_EXT, 0, 0), project(AX_EXT, 0, 0)],
-      y: [project(0, -AX_EXT, 0), project(0, AX_EXT, 0)],
-      z: [project(0, 0, -AX_EXT), project(0, 0, AX_EXT)],
-    };
-    const TICK_VALS = [-1, -0.5, 0, 0.5, 1];
-    const denorm = (t, mn, mx) => mn + ((t + 1) / 2) * (mx - mn);
+    const toPx = (x) => PAD + ((x - xMin) / (xMax - xMin)) * (W - PAD * 2);
+    const toPy = (y) => H - PAD - ((y - yMin) / (yMax - yMin)) * (H - PAD * 2);
 
-    const GRID_N = 5;
-    const gridLines = [];
-    if (plane) {
-      const gv = Array.from({ length: GRID_N }, (_, i) => -1 + (2 * i) / (GRID_N - 1));
-      const zAt = (gx, gy) => Math.max(-1.4, Math.min(1.4, plane.a + plane.b * gx + plane.c * gy));
-      gv.forEach((gx) => {
-        const pts = gv.map((gy) => project(gx, zAt(gx, gy), gy));
-        gridLines.push(pts);
-      });
-      gv.forEach((gy) => {
-        const pts = gv.map((gx) => project(gx, zAt(gx, gy), gy));
-        gridLines.push(pts);
-      });
-    }
+    const TICK_COUNT = 5;
+    const xTicks = Array.from({ length: TICK_COUNT }, (_, i) => xMin + ((xMax - xMin) * i) / (TICK_COUNT - 1));
+    const yTicks = Array.from({ length: TICK_COUNT }, (_, i) => yMin + ((yMax - yMin) * i) / (TICK_COUNT - 1));
+
+    const meanX = xs.reduce((a, v) => a + v, 0) / xs.length;
+    const meanY = ys.reduce((a, v) => a + v, 0) / ys.length;
+    const midPx = toPx(meanX);
+    const midPy = toPy(meanY);
+    const plotL = PAD;
+    const plotR = W - PAD;
+    const plotT = PAD;
+    const plotB = H - PAD;
 
     body = (
       <>
-        <div
-          style={{ ...styles.scatterSvgWrap, cursor: dragRef.current ? "grabbing" : "grab", touchAction: "none" }}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerLeave={onPointerUp}
-        >
+        <div style={styles.scatterSvgWrap}>
           <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
-            {gridLines.map((pts, i) => (
-              <polyline
-                key={`grid-${i}`}
-                points={pts.map((p) => `${p.sx},${p.sy}`).join(" ")}
-                fill="none"
-                stroke="#5b7fb8"
-                strokeOpacity="0.35"
-                strokeWidth="1"
-              />
+            {/* quadrant background shading, split at the average of each axis */}
+            <rect x={plotL} y={plotT} width={midPx - plotL} height={midPy - plotT} fill="#3b82f6" fillOpacity="0.06" />
+            <rect x={midPx} y={plotT} width={plotR - midPx} height={midPy - plotT} fill="#22c55e" fillOpacity="0.06" />
+            <rect x={plotL} y={midPy} width={midPx - plotL} height={plotB - midPy} fill="#eab308" fillOpacity="0.06" />
+            <rect x={midPx} y={midPy} width={plotR - midPx} height={plotB - midPy} fill="#ef4444" fillOpacity="0.06" />
+
+            <line x1={plotL} y1={plotB} x2={plotR} y2={plotB} stroke="#3a3a3a" strokeWidth="1" />
+            <line x1={plotL} y1={plotT} x2={plotL} y2={plotB} stroke="#3a3a3a" strokeWidth="1" />
+
+            {/* quadrant crosshair at the average value of each axis */}
+            <line x1={midPx} y1={plotT} x2={midPx} y2={plotB} stroke="#888" strokeWidth="1.25" strokeDasharray="5 4" />
+            <line x1={plotL} y1={midPy} x2={plotR} y2={midPy} stroke="#888" strokeWidth="1.25" strokeDasharray="5 4" />
+            <text x={midPx} y={plotT - 8} textAnchor="middle" fontSize="10" fill="#999">
+              avg {fmt(meanX, xField?.digits ?? 1)}
+              {xField?.suffix || ""}
+            </text>
+            <text x={plotL - 9} y={midPy - 6} textAnchor="end" fontSize="10" fill="#999">
+              avg {fmt(meanY, yField?.digits ?? 1)}
+              {yField?.suffix || ""}
+            </text>
+
+            {/* quadrant corner labels */}
+            <text x={plotL + 8} y={plotT + 16} fontSize="10.5" fill="#5b9bd5" fontWeight="600">
+              Low {xField?.label} / High {yField?.label}
+            </text>
+            <text x={plotR - 8} y={plotT + 16} textAnchor="end" fontSize="10.5" fill="#4ade80" fontWeight="600">
+              High {xField?.label} / High {yField?.label}
+            </text>
+            <text x={plotL + 8} y={plotB - 8} fontSize="10.5" fill="#facc15" fontWeight="600">
+              Low {xField?.label} / Low {yField?.label}
+            </text>
+            <text x={plotR - 8} y={plotB - 8} textAnchor="end" fontSize="10.5" fill="#f87171" fontWeight="600">
+              High {xField?.label} / Low {yField?.label}
+            </text>
+
+            {xTicks.map((tv, i) => (
+              <g key={`xt-${i}`}>
+                <line x1={toPx(tv)} y1={H - PAD} x2={toPx(tv)} y2={H - PAD + 5} stroke="#3a3a3a" strokeWidth="1" />
+                <text x={toPx(tv)} y={H - PAD + 18} textAnchor="middle" fontSize="10.5" fill="#888">
+                  {fmt(tv, xField?.digits ?? 1)}
+                  {xField?.suffix || ""}
+                </text>
+              </g>
             ))}
-
-            {/* Y axis (vertical) */}
-            <line x1={axisEnds.y[0].sx} y1={axisEnds.y[0].sy} x2={axisEnds.y[1].sx} y2={axisEnds.y[1].sy} stroke="#555" strokeWidth="1.5" />
-            {/* X axis */}
-            <line x1={axisEnds.x[0].sx} y1={axisEnds.x[0].sy} x2={axisEnds.x[1].sx} y2={axisEnds.x[1].sy} stroke="#555" strokeWidth="1.5" />
-            {/* Z axis (depth) */}
-            <line x1={axisEnds.z[0].sx} y1={axisEnds.z[0].sy} x2={axisEnds.z[1].sx} y2={axisEnds.z[1].sy} stroke="#555" strokeWidth="1.5" />
-
-            {TICK_VALS.map((t, i) => {
-              const p = project(t, -1.28, -1.28);
-              return (
-                <text key={`xtk-${i}`} x={p.sx} y={p.sy + 4} textAnchor="middle" fontSize="9.5" fill="#888">
-                  {fmt(denorm(t, xMin, xMax), xField?.digits ?? 1)}
+            {yTicks.map((tv, i) => (
+              <g key={`yt-${i}`}>
+                <line x1={PAD - 5} y1={toPy(tv)} x2={PAD} y2={toPy(tv)} stroke="#3a3a3a" strokeWidth="1" />
+                <text x={PAD - 9} y={toPy(tv) + 3.5} textAnchor="end" fontSize="10.5" fill="#888">
+                  {fmt(tv, yField?.digits ?? 1)}
+                  {yField?.suffix || ""}
                 </text>
-              );
-            })}
-            {TICK_VALS.map((t, i) => {
-              const p = project(-1.28, t, -1.28);
-              return (
-                <text key={`ytk-${i}`} x={p.sx - 6} y={p.sy + 3} textAnchor="end" fontSize="9.5" fill="#888">
-                  {fmt(denorm(t, yMin, yMax), yField?.digits ?? 1)}
-                </text>
-              );
-            })}
-            {TICK_VALS.map((t, i) => {
-              const p = project(-1.28, -1.28, t);
-              return (
-                <text key={`ztk-${i}`} x={p.sx - 6} y={p.sy + 3} textAnchor="end" fontSize="9.5" fill="#7a95c9">
-                  {fmt(denorm(t, zMin, zMax), zField?.digits ?? 1)}
-                </text>
-              );
-            })}
-
-            <text x={axisEnds.x[1].sx} y={axisEnds.x[1].sy + 16} textAnchor="middle" fontSize="13" fill="#bbb" fontWeight="600">
-              {xField?.label}
-              {xField?.suffix}
-            </text>
-            <text x={axisEnds.y[1].sx} y={axisEnds.y[1].sy - 10} textAnchor="middle" fontSize="13" fill="#bbb" fontWeight="600">
-              {yField?.label}
-              {yField?.suffix}
-            </text>
-            <text x={axisEnds.z[1].sx + 8} y={axisEnds.z[1].sy} textAnchor="start" fontSize="13" fill="#9db8ff" fontWeight="600">
-              {zField?.label}
-              {zField?.suffix}
-            </text>
-
-            {projected.map((p) => {
+              </g>
+            ))}
+            {points.map((p) => {
               const isHover = hover?.name === p.name;
-              const depthScale = 0.72 + ((p.depth + 1.4) / 2.8) * 0.5;
-              const r = (isHover ? 9 : 6) * depthScale;
               return (
                 <circle
                   key={p.name}
-                  cx={p.sx}
-                  cy={p.sy}
-                  r={r}
+                  cx={toPx(p.x)}
+                  cy={toPy(p.y)}
+                  r={isHover ? 9 : 6}
                   fill={p.color}
                   stroke={isHover ? "#fff" : "#111"}
                   strokeWidth={isHover ? 2 : 1.5}
                   style={{ cursor: "pointer" }}
-                  onMouseEnter={() => setHover({ name: p.name, x: p.x, y: p.y, z: p.z, px: p.sx, py: p.sy })}
+                  onMouseEnter={() => setHover({ name: p.name, x: p.x, y: p.y, px: toPx(p.x), py: toPy(p.y) })}
                   onMouseLeave={() => setHover((h) => (h?.name === p.name ? null : h))}
                 />
               );
             })}
-
+            <text x={W / 2} y={H - 6} textAnchor="middle" fontSize="13" fill="#999">
+              {xField?.label}
+              {xField?.suffix}
+            </text>
+            <text x={14} y={H / 2} textAnchor="middle" fontSize="13" fill="#999" transform={`rotate(-90 14 ${H / 2})`}>
+              {yField?.label}
+              {yField?.suffix}
+            </text>
             {hover &&
               (() => {
                 const label = `${hover.name}`;
@@ -698,9 +590,8 @@ function ScatterPlot({ availableFields, data }) {
                   hover.y,
                   yField?.digits ?? 1
                 )}${yField?.suffix || ""}`;
-                const sub2 = `${zField?.label}: ${fmt(hover.z, zField?.digits ?? 1)}${zField?.suffix || ""}`;
-                const boxW = Math.max(label.length, sub.length, sub2.length) * 6.6 + 20;
-                const boxH = 58;
+                const boxW = Math.max(label.length, sub.length) * 6.6 + 20;
+                const boxH = 44;
                 let bx = hover.px - boxW / 2;
                 let by = hover.py - boxH - 14;
                 bx = Math.max(4, Math.min(W - boxW - 4, bx));
@@ -714,16 +605,13 @@ function ScatterPlot({ availableFields, data }) {
                     <text x={bx + 10} y={by + 34} fontSize="11" fill="#aaa">
                       {sub}
                     </text>
-                    <text x={bx + 10} y={by + 49} fontSize="11" fill="#9db8ff">
-                      {sub2}
-                    </text>
                   </g>
                 );
               })()}
           </svg>
         </div>
         <p style={styles.overlapHint}>
-          Drag to rotate. Hover a point to see which ball it is instantly. Blue mesh = best-fit trend plane.
+          Hover a point to see which ball it is instantly. Dashed crosshair = average of each axis, splitting the chart into 4 quadrants.
         </p>
         <div style={styles.overlapLegend}>
           {points.map((p) => (
@@ -733,8 +621,7 @@ function ScatterPlot({ availableFields, data }) {
               <span style={styles.overlapLegendValue}>
                 {fmt(p.x, xField?.digits ?? 1)}
                 {xField?.suffix || ""}, {fmt(p.y, yField?.digits ?? 1)}
-                {yField?.suffix || ""}, {fmt(p.z, zField?.digits ?? 1)}
-                {zField?.suffix || ""}
+                {yField?.suffix || ""}
               </span>
             </div>
           ))}
@@ -747,7 +634,7 @@ function ScatterPlot({ availableFields, data }) {
     <section style={styles.panel}>
       <div style={styles.panelHeadRow}>
         <h2 style={styles.panelTitle}>
-          3D Scatter Plot <span style={styles.unit}>(each ball plotted in 3D, with a trend plane — drag to rotate)</span>
+          Scatter Plot <span style={styles.unit}>(each ball plotted, split into 4 quadrants by axis averages)</span>
         </h2>
       </div>
       <div style={styles.scatterAxisRow}>
@@ -771,19 +658,6 @@ function ScatterPlot({ availableFields, data }) {
             ))}
           </select>
         </label>
-        <label style={styles.scatterAxisLabel}>
-          Z axis
-          <select value={zKey} onChange={(e) => setZKey(e.target.value)} style={styles.scatterSelect}>
-            {availableFields.map((f) => (
-              <option key={f.key} value={f.key}>
-                {f.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button type="button" style={styles.sortBtn} onClick={() => setRot({ rx: -0.38, ry: 0.62 })}>
-          Reset view
-        </button>
       </div>
       {body}
     </section>
@@ -1959,7 +1833,7 @@ const styles = {
     width: "100%",
     maxWidth: 980,
     margin: "0 auto",
-    aspectRatio: "900 / 560",
+    aspectRatio: "900 / 540",
   },
   overlapHint: {
     textAlign: "center",
