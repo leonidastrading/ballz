@@ -440,6 +440,7 @@ function sortByKey(arr, key, dir) {
 function ScatterPlot({ availableFields, data }) {
   const [xKey, setXKey] = useState(availableFields[0]?.key || "");
   const [yKey, setYKey] = useState(availableFields[1]?.key || availableFields[0]?.key || "");
+  const [hover, setHover] = useState(null);
 
   const xField = availableFields.find((f) => f.key === xKey) || availableFields[0];
   const yField = availableFields.find((f) => f.key === yKey) || availableFields[0];
@@ -451,9 +452,9 @@ function ScatterPlot({ availableFields, data }) {
       (p) => p.x !== null && p.x !== undefined && p.y !== null && p.y !== undefined && !Number.isNaN(p.x) && !Number.isNaN(p.y)
     );
 
-  const W = 640;
-  const H = 380;
-  const PAD = 46;
+  const W = 900;
+  const H = 520;
+  const PAD = 54;
 
   let trend = null;
   if (points.length >= 2) {
@@ -519,24 +520,59 @@ function ScatterPlot({ availableFields, data }) {
                 strokeDasharray="6 4"
               />
             )}
-            {points.map((p) => (
-              <circle key={p.name} cx={toPx(p.x)} cy={toPy(p.y)} r="6" fill={p.color} stroke="#111" strokeWidth="1.5">
-                <title>{`${p.name}: ${xField?.label} ${fmt(p.x, xField?.digits ?? 1)}${xField?.suffix || ""}, ${
-                  yField?.label
-                } ${fmt(p.y, yField?.digits ?? 1)}${yField?.suffix || ""}`}</title>
-              </circle>
-            ))}
-            <text x={W / 2} y={H - 10} textAnchor="middle" fontSize="12" fill="#999">
+            {points.map((p) => {
+              const isHover = hover?.name === p.name;
+              return (
+                <circle
+                  key={p.name}
+                  cx={toPx(p.x)}
+                  cy={toPy(p.y)}
+                  r={isHover ? 9 : 6}
+                  fill={p.color}
+                  stroke={isHover ? "#fff" : "#111"}
+                  strokeWidth={isHover ? 2 : 1.5}
+                  style={{ cursor: "pointer" }}
+                  onMouseEnter={() => setHover({ name: p.name, x: p.x, y: p.y, px: toPx(p.x), py: toPy(p.y) })}
+                  onMouseLeave={() => setHover((h) => (h?.name === p.name ? null : h))}
+                />
+              );
+            })}
+            <text x={W / 2} y={H - 12} textAnchor="middle" fontSize="13" fill="#999">
               {xField?.label}
               {xField?.suffix}
             </text>
-            <text x={16} y={H / 2} textAnchor="middle" fontSize="12" fill="#999" transform={`rotate(-90 16 ${H / 2})`}>
+            <text x={18} y={H / 2} textAnchor="middle" fontSize="13" fill="#999" transform={`rotate(-90 18 ${H / 2})`}>
               {yField?.label}
               {yField?.suffix}
             </text>
+            {hover &&
+              (() => {
+                const label = `${hover.name}`;
+                const sub = `${xField?.label}: ${fmt(hover.x, xField?.digits ?? 1)}${xField?.suffix || ""}   ${yField?.label}: ${fmt(
+                  hover.y,
+                  yField?.digits ?? 1
+                )}${yField?.suffix || ""}`;
+                const boxW = Math.max(label.length, sub.length) * 6.6 + 20;
+                const boxH = 44;
+                let bx = hover.px - boxW / 2;
+                let by = hover.py - boxH - 14;
+                bx = Math.max(4, Math.min(W - boxW - 4, bx));
+                if (by < 4) by = hover.py + 14;
+                return (
+                  <g pointerEvents="none">
+                    <rect x={bx} y={by} width={boxW} height={boxH} rx={7} fill="#0f0f0f" stroke="#444" strokeWidth="1" />
+                    <text x={bx + 10} y={by + 18} fontSize="12.5" fontWeight="700" fill="#fff">
+                      {label}
+                    </text>
+                    <text x={bx + 10} y={by + 34} fontSize="11" fill="#aaa">
+                      {sub}
+                    </text>
+                  </g>
+                );
+              })()}
           </svg>
         </div>
-        <p style={styles.overlapHint}>Hover a point to see which ball it is. Dashed line = trend (best-fit slope).</p>
+        <p style={styles.overlapHint}>Hover a point to see which ball it is instantly. Dashed line = trend (best-fit slope).</p>
         <div style={styles.overlapLegend}>
           {points.map((p) => (
             <div key={p.name} style={styles.overlapLegendItem}>
@@ -1755,9 +1791,9 @@ const styles = {
   },
   scatterSvgWrap: {
     width: "100%",
-    maxWidth: 640,
+    maxWidth: 980,
     margin: "0 auto",
-    aspectRatio: "640 / 380",
+    aspectRatio: "900 / 520",
   },
   overlapHint: {
     textAlign: "center",
