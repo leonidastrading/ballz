@@ -705,12 +705,29 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
 }
 
 function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = false }) {
+  // With more than 2 bars, zoom the scale so the smallest value still reads as a
+  // substantial bar (50%) instead of nearly-equal values all looking maxed out.
+  const mags = data
+    .map((d) => d[valueKey])
+    .filter((v) => v !== null && v !== undefined)
+    .map((v) => (signed ? Math.abs(v) : v));
+  const useZoom = data.length > 2 && mags.length > 1;
+  const zoomMin = useZoom ? Math.min(...mags) : 0;
+  const zoomMax = useZoom ? Math.max(...mags) : 0;
+
   return (
     <div style={styles.barChart}>
       {data.map((d) => {
         const v = d[valueKey];
-        const mag = v == null ? 0 : Math.abs(v);
-        const widthPct = v == null ? 0 : Math.min(100, (mag / maxValue) * 100);
+        const mag = v == null ? 0 : signed ? Math.abs(v) : v;
+        let widthPct;
+        if (v == null) {
+          widthPct = 0;
+        } else if (useZoom) {
+          widthPct = zoomMax > zoomMin ? 50 + (50 * (mag - zoomMin)) / (zoomMax - zoomMin) : 100;
+        } else {
+          widthPct = Math.min(100, (mag / maxValue) * 100);
+        }
         const displayVal =
           v == null ? "—" : `${signed && v > 0 ? "+" : ""}${fmt(v, digits)}${suffix}`;
         return (
