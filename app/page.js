@@ -717,8 +717,10 @@ export default function Home() {
               ...condData.map((d) => (panel.signed ? Math.abs(d[panel.key] || 0) : d[panel.key] || 0))
             );
             const isDriverCondition = condition.toLowerCase().includes("driver");
-            const colorNameByCover =
+            const isDriverDistancePanel =
               isDriverCondition && (panel.key === "carry" || panel.key === "total");
+            const isSpinPanel = panel.key === "spin";
+            const colorNameByCover = isDriverDistancePanel || isSpinPanel;
             return (
               <section style={styles.panel} key={panel.key}>
                 <div style={styles.panelHeadRow}>
@@ -740,7 +742,6 @@ export default function Home() {
                   digits={panel.digits ?? 1}
                   suffix={panel.suffix || ""}
                   signed={!!panel.signed}
-                  showCover={panel.key === "spin"}
                   colorNameByCover={colorNameByCover}
                 />
               </section>
