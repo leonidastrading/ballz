@@ -437,6 +437,157 @@ function sortByKey(arr, key, dir) {
   return copy;
 }
 
+function ScatterPlot({ availableFields, data }) {
+  const [xKey, setXKey] = useState(availableFields[0]?.key || "");
+  const [yKey, setYKey] = useState(availableFields[1]?.key || availableFields[0]?.key || "");
+
+  const xField = availableFields.find((f) => f.key === xKey) || availableFields[0];
+  const yField = availableFields.find((f) => f.key === yKey) || availableFields[0];
+
+  const points = data
+    .filter((d) => !d.isAverage)
+    .map((d) => ({ name: d.name, color: d.color, x: d[xKey], y: d[yKey] }))
+    .filter(
+      (p) => p.x !== null && p.x !== undefined && p.y !== null && p.y !== undefined && !Number.isNaN(p.x) && !Number.isNaN(p.y)
+    );
+
+  const W = 640;
+  const H = 380;
+  const PAD = 46;
+
+  let trend = null;
+  if (points.length >= 2) {
+    const n = points.length;
+    const sumX = points.reduce((a, p) => a + p.x, 0);
+    const sumY = points.reduce((a, p) => a + p.y, 0);
+    const sumXY = points.reduce((a, p) => a + p.x * p.y, 0);
+    const sumXX = points.reduce((a, p) => a + p.x * p.x, 0);
+    const denom = n * sumXX - sumX * sumX;
+    if (denom !== 0) {
+      const slope = (n * sumXY - sumX * sumY) / denom;
+      const intercept = (sumY - slope * sumX) / n;
+      trend = { slope, intercept };
+    }
+  }
+
+  let body;
+  if (points.length === 0) {
+    body = (
+      <p style={{ color: "#888", textAlign: "center", padding: "24px 0" }}>
+        Select balls with data for both axes to see a scatter plot.
+      </p>
+    );
+  } else {
+    const xs = points.map((p) => p.x);
+    const ys = points.map((p) => p.y);
+    let xMin = Math.min(...xs);
+    let xMax = Math.max(...xs);
+    let yMin = Math.min(...ys);
+    let yMax = Math.max(...ys);
+    if (xMin === xMax) {
+      xMin -= 1;
+      xMax += 1;
+    }
+    if (yMin === yMax) {
+      yMin -= 1;
+      yMax += 1;
+    }
+    const xPad = (xMax - xMin) * 0.12;
+    const yPad = (yMax - yMin) * 0.12;
+    xMin -= xPad;
+    xMax += xPad;
+    yMin -= yPad;
+    yMax += yPad;
+
+    const toPx = (x) => PAD + ((x - xMin) / (xMax - xMin)) * (W - PAD * 2);
+    const toPy = (y) => H - PAD - ((y - yMin) / (yMax - yMin)) * (H - PAD * 2);
+
+    body = (
+      <>
+        <div style={styles.scatterSvgWrap}>
+          <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+            <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="#3a3a3a" strokeWidth="1" />
+            <line x1={PAD} y1={PAD} x2={PAD} y2={H - PAD} stroke="#3a3a3a" strokeWidth="1" />
+            {trend && (
+              <line
+                x1={toPx(xMin)}
+                y1={toPy(trend.slope * xMin + trend.intercept)}
+                x2={toPx(xMax)}
+                y2={toPy(trend.slope * xMax + trend.intercept)}
+                stroke="#888"
+                strokeWidth="1.5"
+                strokeDasharray="6 4"
+              />
+            )}
+            {points.map((p) => (
+              <circle key={p.name} cx={toPx(p.x)} cy={toPy(p.y)} r="6" fill={p.color} stroke="#111" strokeWidth="1.5">
+                <title>{`${p.name}: ${xField?.label} ${fmt(p.x, xField?.digits ?? 1)}${xField?.suffix || ""}, ${
+                  yField?.label
+                } ${fmt(p.y, yField?.digits ?? 1)}${yField?.suffix || ""}`}</title>
+              </circle>
+            ))}
+            <text x={W / 2} y={H - 10} textAnchor="middle" fontSize="12" fill="#999">
+              {xField?.label}
+              {xField?.suffix}
+            </text>
+            <text x={16} y={H / 2} textAnchor="middle" fontSize="12" fill="#999" transform={`rotate(-90 16 ${H / 2})`}>
+              {yField?.label}
+              {yField?.suffix}
+            </text>
+          </svg>
+        </div>
+        <p style={styles.overlapHint}>Hover a point to see which ball it is. Dashed line = trend (best-fit slope).</p>
+        <div style={styles.overlapLegend}>
+          {points.map((p) => (
+            <div key={p.name} style={styles.overlapLegendItem}>
+              <span style={{ ...styles.swatch, background: p.color, flex: "0 0 auto" }} />
+              <span style={styles.overlapLegendName}>{p.name}</span>
+              <span style={styles.overlapLegendValue}>
+                {fmt(p.x, xField?.digits ?? 1)}
+                {xField?.suffix || ""}, {fmt(p.y, yField?.digits ?? 1)}
+                {yField?.suffix || ""}
+              </span>
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <section style={styles.panel}>
+      <div style={styles.panelHeadRow}>
+        <h2 style={styles.panelTitle}>
+          Scatter Plot <span style={styles.unit}>(each ball plotted, with a trend line)</span>
+        </h2>
+      </div>
+      <div style={styles.scatterAxisRow}>
+        <label style={styles.scatterAxisLabel}>
+          X axis
+          <select value={xKey} onChange={(e) => setXKey(e.target.value)} style={styles.scatterSelect}>
+            {availableFields.map((f) => (
+              <option key={f.key} value={f.key}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label style={styles.scatterAxisLabel}>
+          Y axis
+          <select value={yKey} onChange={(e) => setYKey(e.target.value)} style={styles.scatterSelect}>
+            {availableFields.map((f) => (
+              <option key={f.key} value={f.key}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {body}
+    </section>
+  );
+}
+
 function BallChat({ tabId, tabLabel, contextText }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -703,6 +854,33 @@ export default function Home() {
   }));
   const ballLevelData = withAverageEntry(ballLevelDataRaw, ["name", "color", "isAverage"]);
 
+  // Fields available to plot on the scatter chart: every condition-panel metric
+  // plus every ball-level (condition-independent) metric, deduped by key.
+  const scatterFields = [];
+  (activeSource.panels || []).forEach((p) => {
+    scatterFields.push({
+      key: p.key,
+      label: p.label,
+      digits: p.digits ?? 1,
+      suffix: p.suffix || p.valueSuffix || "",
+    });
+  });
+  (activeSource.ballLevelBars || []).forEach((bl) => {
+    if (scatterFields.some((f) => f.key === bl.key)) return;
+    scatterFields.push({
+      key: bl.key,
+      label: bl.label,
+      digits: bl.digits ?? 1,
+      suffix: bl.suffix || "",
+    });
+  });
+  const scatterData = selectedBalls.map((b) => ({
+    name: b.name,
+    color: BALL_COLORS[b.name],
+    ...(b.conditions ? b.conditions[condition] : {}),
+    ...Object.fromEntries((activeSource.ballLevelBars || []).map((bl) => [bl.key, b[bl.key]])),
+  }));
+
   return (
     <main style={styles.main}>
       <header style={styles.header}>
@@ -796,6 +974,8 @@ export default function Home() {
         tabLabel={activeSource.label}
         contextText={buildBallContext(activeSource, condition, selectedBalls)}
       />
+
+      <ScatterPlot key={activeSource.id + "-scatter"} availableFields={scatterFields} data={scatterData} />
 
       {selectedBalls.length === 0 ? (
         <section style={styles.panel}>
@@ -1550,6 +1730,34 @@ const styles = {
     maxWidth: 320,
     margin: "0 auto",
     aspectRatio: "1 / 1",
+  },
+  scatterAxisRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 16,
+    marginBottom: 12,
+  },
+  scatterAxisLabel: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    fontSize: 12.5,
+    color: "#999",
+  },
+  scatterSelect: {
+    background: "#0f0f0f",
+    color: "#e6e6e6",
+    border: "1px solid #333",
+    borderRadius: 6,
+    padding: "5px 8px",
+    fontSize: 12.5,
+    fontFamily: "inherit",
+  },
+  scatterSvgWrap: {
+    width: "100%",
+    maxWidth: 640,
+    margin: "0 auto",
+    aspectRatio: "640 / 380",
   },
   overlapHint: {
     textAlign: "center",
