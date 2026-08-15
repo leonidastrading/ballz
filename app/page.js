@@ -356,6 +356,15 @@ function coverLabel(cover) {
   return null;
 }
 
+// Slight color tint for the ball-name text on Driver Carry/Total Distance panels:
+// a touch of blue for Urethane covers, a touch of red for Ionomer covers.
+function coverNameColor(cover) {
+  const label = coverLabel(cover);
+  if (label === "Urethane") return "#a9c6f5";
+  if (label === "Ionomer") return "#f2a9a9";
+  return null;
+}
+
 function sortByKey(arr, key, dir) {
   if (!dir) return arr;
   const copy = [...arr];
@@ -707,11 +716,22 @@ export default function Home() {
               1,
               ...condData.map((d) => (panel.signed ? Math.abs(d[panel.key] || 0) : d[panel.key] || 0))
             );
+            const isDriverCondition = condition.toLowerCase().includes("driver");
+            const colorNameByCover =
+              isDriverCondition && (panel.key === "carry" || panel.key === "total");
             return (
               <section style={styles.panel} key={panel.key}>
                 <div style={styles.panelHeadRow}>
                   <h2 style={styles.panelTitle}>
                     {panel.label} — {condition} <span style={styles.unit}>{panel.unit}</span>
+                    {colorNameByCover && (
+                      <span
+                        style={styles.coverInfoIcon}
+                        title="Ball name color (driver Carry/Total only): slightly blue = Urethane cover, slightly red = Ionomer cover."
+                      >
+                        ⓘ
+                      </span>
+                    )}
                   </h2>
                   <SortButton dir={dir} onClick={() => cycleSort(panel.key)} label={panel.label} />
                 </div>
@@ -723,6 +743,7 @@ export default function Home() {
                   suffix={panel.suffix || ""}
                   signed={!!panel.signed}
                   showCover={panel.key === "spin"}
+                  colorNameByCover={colorNameByCover}
                 />
               </section>
             );
@@ -965,7 +986,7 @@ function OverlapCircleChart({ data, valueKey, maxValue, digits = 1, valueSuffix 
   );
 }
 
-function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = false, showCover = false }) {
+function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = false, showCover = false, colorNameByCover = false }) {
   // With more than 2 bars, zoom the scale so the smallest value still reads as a
   // substantial bar (50%) instead of nearly-equal values all looking maxed out.
   const mags = data
@@ -992,6 +1013,7 @@ function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = 
         const displayVal =
           v == null ? "—" : `${signed && v > 0 ? "+" : ""}${fmt(v, digits)}${suffix}`;
         const cover = showCover ? coverLabel(d.cover) : null;
+        const nameColor = colorNameByCover && !d.isAverage ? coverNameColor(d.cover) : null;
         return (
           <div key={d.name} style={styles.barRow}>
             <div style={styles.barLabelWrap}>
@@ -999,6 +1021,8 @@ function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = 
                 style={
                   d.isAverage
                     ? { ...styles.barLabel, fontWeight: 700, fontStyle: "italic", color: "#eee" }
+                    : nameColor
+                    ? { ...styles.barLabel, color: nameColor }
                     : styles.barLabel
                 }
               >
@@ -1387,6 +1411,13 @@ const styles = {
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
+  },
+  coverInfoIcon: {
+    marginLeft: 6,
+    fontSize: 12,
+    color: "#888",
+    cursor: "help",
+    fontStyle: "normal",
   },
   barTrack: {
     background: "#0f0f0f",
