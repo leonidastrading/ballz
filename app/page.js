@@ -513,6 +513,7 @@ export default function Home() {
   const ballLevelDataRaw = selectedBalls.map((b) => ({
     name: b.name,
     color: BALL_COLORS[b.name],
+    cover: b.cover,
     ...Object.fromEntries((activeSource.ballLevelBars || []).map((bl) => [bl.key, b[bl.key]])),
   }));
   const ballLevelData = withAverageEntry(ballLevelDataRaw, ["name", "color", "isAverage"]);
@@ -750,35 +751,45 @@ export default function Home() {
         </>
       )}
 
-      {(activeSource.ballLevelBars || []).map((bl) => (
-        <section style={styles.panel} key={bl.key}>
-          <div style={styles.panelHeadRow}>
-            <h2 style={styles.panelTitle}>
-              {bl.label} <span style={styles.unit}>{bl.unit}</span>
-            </h2>
-            {selectedBalls.length > 0 && (
-              <SortButton
-                dir={sortDir[bl.key] || null}
-                onClick={() => cycleSort(bl.key)}
-                label={bl.label}
+      {(activeSource.ballLevelBars || []).map((bl) => {
+        const colorNameByCover = bl.key === "compression";
+        return (
+          <section style={styles.panel} key={bl.key}>
+            <div style={styles.panelHeadRow}>
+              <h2 style={styles.panelTitle}>
+                {bl.label} <span style={styles.unit}>{bl.unit}</span>
+              </h2>
+              {selectedBalls.length > 0 && (
+                <SortButton
+                  dir={sortDir[bl.key] || null}
+                  onClick={() => cycleSort(bl.key)}
+                  label={bl.label}
+                />
+              )}
+            </div>
+            {colorNameByCover && selectedBalls.length > 0 && (
+              <p style={styles.coverInfoText}>
+                Ball name color: <span style={{ color: "#a9c6f5" }}>slightly blue = Urethane cover</span>,{" "}
+                <span style={{ color: "#f2a9a9" }}>slightly red = Ionomer cover</span>.
+              </p>
+            )}
+            {selectedBalls.length === 0 ? (
+              <p style={{ color: "#888", textAlign: "center", padding: "24px 0" }}>
+                Select balls to compare {bl.label.toLowerCase()}.
+              </p>
+            ) : (
+              <BarPanel
+                data={sortByKey(ballLevelData, bl.key, sortDir[bl.key])}
+                valueKey={bl.key}
+                maxValue={bl.maxValue}
+                digits={bl.digits}
+                suffix={bl.suffix}
+                colorNameByCover={colorNameByCover}
               />
             )}
-          </div>
-          {selectedBalls.length === 0 ? (
-            <p style={{ color: "#888", textAlign: "center", padding: "24px 0" }}>
-              Select balls to compare {bl.label.toLowerCase()}.
-            </p>
-          ) : (
-            <BarPanel
-              data={sortByKey(ballLevelData, bl.key, sortDir[bl.key])}
-              valueKey={bl.key}
-              maxValue={bl.maxValue}
-              digits={bl.digits}
-              suffix={bl.suffix}
-            />
-          )}
-        </section>
-      ))}
+          </section>
+        );
+      })}
 
       {activeSource.wedgeWetDryPanels &&
         selectedBalls.length > 0 &&
