@@ -444,10 +444,15 @@ export default function Home() {
     } catch (e) {}
   }, [sourceId, selectedBySource, conditionBySource, hydrated]);
 
+  // Every sortable column defaults to High -> Low until the user explicitly changes it.
+  function getDir(key) {
+    return key in sortDir ? sortDir[key] : "desc";
+  }
+
   function cycleSort(key) {
     setSortDir((prev) => {
-      const cur = prev[key];
-      const next = !cur ? "desc" : cur === "desc" ? "asc" : null;
+      const cur = key in prev ? prev[key] : "desc";
+      const next = cur === "desc" ? "asc" : cur === "asc" ? null : "desc";
       return { ...prev, [key]: next };
     });
   }
@@ -614,7 +619,7 @@ export default function Home() {
       ) : (
         <>
           {activeSource.panels.map((panel) => {
-            const dir = sortDir[panel.key] || null;
+            const dir = getDir(panel.key);
             const sorted = sortByKey(condData, panel.key, dir);
 
             if (panel.type === "circle") {
@@ -761,7 +766,7 @@ export default function Home() {
               </h2>
               {selectedBalls.length > 0 && (
                 <SortButton
-                  dir={sortDir[bl.key] || null}
+                  dir={getDir(bl.key)}
                   onClick={() => cycleSort(bl.key)}
                   label={bl.label}
                 />
@@ -779,7 +784,7 @@ export default function Home() {
               </p>
             ) : (
               <BarPanel
-                data={sortByKey(ballLevelData, bl.key, sortDir[bl.key])}
+                data={sortByKey(ballLevelData, bl.key, getDir(bl.key))}
                 valueKey={bl.key}
                 maxValue={bl.maxValue}
                 digits={bl.digits}
@@ -809,7 +814,7 @@ export default function Home() {
           </div>
           {activeSource.wedgeWetDryPanels.map((panel) => {
             const sortKey = `wetdry_${panel.key}`;
-            const dir = sortDir[sortKey] || null;
+            const dir = getDir(sortKey);
             const rawBase = selectedBalls.map((b) => {
               const entry = activeSource.wedgeWetDryData[b.name] || {};
               const dry = entry.dry ? entry.dry[panel.key] ?? null : null;
