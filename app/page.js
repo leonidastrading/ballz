@@ -6,6 +6,7 @@ import { BALLS_2024 } from "../lib/data2024";
 import { BALLS_2025 } from "../lib/data2025";
 import { BALLS_MGS2025 } from "../lib/dataMgs2025";
 import { WEDGE_WET_DRY } from "../lib/dataWedgeWetDry";
+import { BALLS_BALL_ADDICT, CONDITIONS_BALL_ADDICT } from "../lib/dataBallAddict";
 
 function colorsFor(balls) {
   const n = balls.length;
@@ -194,6 +195,113 @@ const SOURCES = [
     ballLevelBars: [],
     footerNote:
       "Data: MyGolfSpy 2025 Ball Test — single-shot driver/mid-iron/wedge results, 44 balls (coverage varies by ball/condition).",
+  },
+  {
+    id: "balladdict",
+    label: "Ball Addict",
+    balls: BALLS_BALL_ADDICT,
+    conditions: CONDITIONS_BALL_ADDICT.map((c) => ({ key: c, label: c })),
+    defaultCondition: "Driver",
+    panels: [
+      { type: "bar", key: "carry", label: "Carry", unit: "(yd)", digits: 1, suffix: " yd" },
+      { type: "bar", key: "total", label: "Total Distance", unit: "(yd)", digits: 1, suffix: " yd" },
+      { type: "bar", key: "speed", label: "Ball Speed", unit: "(mph)", digits: 1, suffix: " mph" },
+      { type: "bar", key: "spin", label: "Spin", unit: "(rpm)", digits: 0, suffix: " rpm" },
+      { type: "bar", key: "smash", label: "Smash Factor", unit: "", digits: 2, suffix: "" },
+      { type: "bar", key: "launch", label: "Launch Angle", unit: "(°)", digits: 1, suffix: "°" },
+    ],
+    ballLevelBars: [
+      {
+        key: "compression",
+        label: "Compression",
+        unit: "(does not change with condition)",
+        maxValue: 120,
+        digits: 0,
+        suffix: "",
+      },
+      {
+        key: "dimples",
+        label: "Dimples",
+        unit: "(2026-sheet balls only)",
+        maxValue: 450,
+        digits: 0,
+        suffix: "",
+      },
+      {
+        key: "accuracy",
+        label: "Accuracy",
+        unit: "(/10 — normalized; 2025-sheet balls originally rated as a %)",
+        maxValue: 10,
+        digits: 1,
+        suffix: "",
+      },
+      {
+        key: "consistency",
+        label: "Consistency",
+        unit: "(/10)",
+        maxValue: 10,
+        digits: 1,
+        suffix: "",
+      },
+      {
+        key: "durability",
+        label: "Durability",
+        unit: "(/10)",
+        maxValue: 10,
+        digits: 1,
+        suffix: "",
+      },
+      {
+        key: "forgiveness",
+        label: "Forgiveness",
+        unit: "(/10)",
+        maxValue: 10,
+        digits: 1,
+        suffix: "",
+      },
+      {
+        key: "feel",
+        label: "Feel",
+        unit: "(/10 — 2025-sheet balls only)",
+        maxValue: 10,
+        digits: 1,
+        suffix: "",
+      },
+      {
+        key: "missHitFeel",
+        label: "Miss-Hit Feel",
+        unit: "(/10 — 2025-sheet balls only)",
+        maxValue: 10,
+        digits: 1,
+        suffix: "",
+      },
+      {
+        key: "value",
+        label: "Value",
+        unit: "(/10 — 2025-sheet balls only)",
+        maxValue: 10,
+        digits: 1,
+        suffix: "",
+      },
+      {
+        key: "greenSpin",
+        label: "Green Spin",
+        unit: "(rpm — 2025-sheet balls only)",
+        maxValue: 9000,
+        digits: 0,
+        suffix: " rpm",
+      },
+      {
+        key: "price",
+        label: "Price",
+        unit: "($ — 2026-sheet balls only, approx., parsed from listed price)",
+        maxValue: 120,
+        digits: 0,
+        suffix: "",
+      },
+    ],
+    footerNote:
+      "Data: combined & cleaned 2026 + 2025 ball data — 133 balls after removing 2025 duplicates already covered by the 2026 sheet and any ball/brand not found on the official USGA Conforming Golf Ball List. Coverage varies by ball/condition since the two source sheets used different club sets (2026: chipping/pitch/9-iron/7-iron/4H/driver; 2025: 50yd/PW/7-iron/driver).",
   },
 ];
 
