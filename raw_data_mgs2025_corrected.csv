@@ -1,0 +1,173 @@
+Club,ClubSpeed,BallModel,BallSpeed,LaunchAngle,SpinAxis,Spin,MaxHeight,DescentAngle,Carry,Total
+Driver,Fast,"Srixon Z-STAR",165.84,9.64,-2.41,2944,87.63,32.6,288.99,316.27
+Driver,Fast,"Srixon Z-STAR DIVIDE",165.99,10.14,-2.88,2737,89.23,32.1,289.98,317.43
+Driver,Fast,"Member's Mark Pro Series 2",166.98,9.75,0.74,2791,88.2,31.54,293.43,322.2
+Driver,Fast,"Wilson Staff Model X",168.02,9.65,-1.33,2873,85.33,31.53,290.48,317.73
+Driver,Fast,"TaylorMade TP5",165.27,9.51,-3.25,2720,87.03,31.51,284.48,310.66
+Driver,Fast,"Srixon Z-STAR DIAMOND",167.01,9.8,-1.46,2958,85.82,31.25,291.96,322.25
+Driver,Fast,"Vice Pro Plus",166.42,9.73,1.19,2786,84.82,30.96,288,319.3
+Driver,Fast,"Srixon Z-STAR XV",167.34,9.61,-1.14,2766,84.37,30.71,292.41,324.09
+Driver,Fast,"Wilson Staff Model",167.27,9.84,-1.24,2749,83.77,30.66,290.97,321.6
+Driver,Fast,"Titleist Pro V1x",167.79,9.58,-0.35,2680,81.93,30.55,290.45,320.09
+Driver,Fast,"TaylorMade TP5x",166.28,9.81,-2.04,2524,81.02,30.21,284.51,313.08
+Driver,Fast,"Kirkland Performance+ v3.5",166.53,10.05,-3.1,2658,83.6,30.19,291.96,322.72
+Driver,Fast,"Srixon Q-STAR TOUR",163.94,9.93,-2.59,2627,80.67,29.81,285.49,316.59
+Driver,Fast,"Bridgestone TOUR B X",166.47,9.63,-1.49,2892,82.35,29.81,291.96,324.83
+Driver,Fast,"Bridgestone TOUR B XS",165.61,9.36,-1.16,2844,81.47,29.7,291.97,320.99
+Driver,Fast,"Callaway Chrome Soft",164.87,9.79,-2.76,2633,79.7,29.58,284.99,318.58
+Driver,Fast,"Maxfli Tour X",168.16,9.6,0.27,2565,80.87,29.58,289.96,320.15
+Driver,Fast,"PXG Xtreme Tour X",167.65,9.74,-3.16,2669,80.31,29.48,288,320.27
+Driver,Fast,"Titleist Tour Soft",167.09,9.75,-4.49,2735,80.78,29.47,290.99,324.26
+Driver,Fast,"Bridgestone TOUR B RX",165.32,9.67,-3.27,2673,77.52,29.19,284.48,315.83
+Driver,Fast,"Wilson Triad",165.01,9.62,-0.52,2711,77.15,29.17,281.44,314.85
+Driver,Fast,"Vice Pro Air",163.71,9.76,0.57,2541,77.92,29.05,282.96,315.19
+Driver,Mid,"Srixon Z-STAR DIVIDE",149.02,12.32,-1.97,2444,79.89,32.2,249.52,275.23
+Driver,Mid,"TaylorMade TP5",148.59,11.86,-1.32,2626,80.16,31.88,252,277.96
+Driver,Mid,"Member's Mark Pro Series 2",149.6,12.09,1.12,2495,79.41,31.81,254.45,279.75
+Driver,Mid,"Srixon Z-STAR",148.89,11.98,-1.86,2643,76.91,31.22,247.52,277.34
+Driver,Mid,"Vice Pro Plus",149.3,12.08,0.89,2531,78.44,31.14,254.98,283.44
+Driver,Mid,"TaylorMade TP5x",149.16,12.24,0.7,2629,80.2,31.12,256.49,284.68
+Driver,Mid,"Wilson Staff Model X",150.27,11.87,-1.62,2686,79.01,30.98,256.95,286.47
+Driver,Mid,"Vice Pro",148.51,12.28,-0.41,2505,76.15,30.62,252.5,280.13
+Driver,Mid,"Bridgestone TOUR B XS",148.73,11.94,0.23,2671,75.75,30.43,254,283.32
+Driver,Mid,"Kirkland Performance+ v3.5",149.22,12.42,-1.47,2343,76.42,30.42,252.49,281.76
+Driver,Mid,"Callaway Chrome Tour Triple Diamond",150.47,12.17,-1.2,2411,76.86,30.41,254.98,285.38
+Driver,Mid,"Srixon Z-STAR XV",149.7,12.03,-0.37,2619,77.65,30.21,257.47,287.69
+Driver,Mid,"Srixon Q-STAR TOUR",147.67,12.34,-0.57,2415,74.67,30.13,249.49,279.54
+Driver,Mid,"Maxfli Tour",149.23,12.17,-1.06,2510,74.96,30.12,253,283.1
+Driver,Mid,"Wilson Staff Model",149.9,12.21,-1.38,2438,75.78,30.08,252.49,281.2
+Driver,Mid,"Bridgestone TOUR B X",149.22,11.86,-1.29,2636,75.95,30.06,254.98,284.57
+Driver,Mid,"Maxfli Tour X",150.37,12.34,1.1,2406,78.11,29.92,260.41,289.45
+Driver,Mid,"Srixon Z-STAR DIAMOND",149.4,11.97,-1.04,2687,76.29,29.89,256.46,286.81
+Driver,Mid,"PXG Xtreme Tour",149.65,12.36,-1.97,2422,75.31,29.78,254,282.57
+Driver,Mid,"Mizuno Pro S",148.95,12.14,0.33,2438,72.34,29.69,246.52,277.3
+Driver,Mid,"Titleist Pro V1x Left Dash",149.91,12.15,-1.07,2335,75.04,29.61,253,285.44
+Driver,Mid,"Callaway Chrome Tour X",149.92,12.08,0.35,2777,75.57,29.53,255.99,287.59
+Driver,Slow,"Srixon Z-STAR DIVIDE",123.35,12.47,0.8,3092,59.73,30.65,187,215.88
+Driver,Slow,"TaylorMade TP5",123.44,12.04,0.57,3316,59.33,30.5,183.96,212.02
+Driver,Slow,"Vice Pro Plus",123.51,12.4,1.16,3254,59.42,30.45,188,218.3
+Driver,Slow,"PXG Xtreme Tour",123.9,12.5,0.51,2995,59.52,30.31,190.98,220.28
+Driver,Slow,"TaylorMade TP5x",123.5,12.5,0.33,3291,59.58,30.26,186.98,216.84
+Driver,Slow,"Member's Mark Pro Series 2",123.45,12.31,1.01,3110,58.7,29.96,185.99,215.63
+Driver,Slow,"Srixon Z-STAR XV",123.68,12.3,0.85,3285,58.5,29.88,188.5,218.72
+Driver,Slow,"Srixon Z-STAR",123.22,12.18,-0.65,3266,57.87,29.83,187,218.45
+Driver,Slow,"Kirkland Performance+ v3.5",123.42,12.61,0.57,3013,58.05,29.8,187.5,218.62
+Driver,Slow,"Titleist Velocity",124.04,12.47,0.01,3209,58.92,29.76,191.02,221.87
+Driver,Slow,"Bridgestone TOUR B X",123.61,12.14,0.47,3333,57.52,29.68,187.49,219.21
+Driver,Slow,"Callaway Chrome Tour X",123.99,12.16,1.19,3486,56.65,29.67,189.5,219.4
+Driver,Slow,"Srixon Q-STAR TOUR",122.56,12.59,-0.51,2899,58.06,29.59,185.98,218.12
+Driver,Slow,"Maxfli Tour X",124.05,12.47,1.52,3227,58.2,29.58,190,220.4
+Driver,Slow,"Wilson Staff Model",124.01,12.21,1.15,3209,57.94,29.57,187,218.99
+Driver,Slow,"Bridgestone TOUR B XS",123.24,12.18,0.73,3313,57.02,29.49,185.99,216.91
+Driver,Slow,"Bridgestone TOUR B RX",123.09,12.1,-0.08,3170,56.97,29.49,187.49,219.38
+Driver,Slow,"Srixon Z-STAR DIAMOND",123.57,12.4,0.41,3319,57.18,29.48,188.5,220.8
+Driver,Slow,"Titleist Tour Soft",123.88,12.29,-0.08,3237,57.25,29.3,190.01,221.66
+Driver,Slow,"Maxfli Tour",123.48,12.4,0.84,2958,56.65,29.25,188,217.85
+Driver,Slow,"TaylorMade Tour Response",123.08,12.72,0.53,2770,58.02,29.25,184.96,217.29
+Driver,Slow,"Wilson Staff Model X",124.27,12.22,0.63,3298,57.64,29.19,190,221.78
+Mid Iron,Fast,"Wilson Staff Model",127.08,16.93,1.79,6513,111.92,50.47,179.4,184.38
+Mid Iron,Fast,"Srixon Z-STAR DIVIDE",126.66,16.93,1.9,6636,109.34,50.2,176.42,180.89
+Mid Iron,Fast,"Maxfli Tour",127.24,17,0.59,6496,110.7,50.07,179.68,186.11
+Mid Iron,Fast,"TaylorMade TP5",126.79,17.2,2.11,6332,109.74,49.43,182.35,190.91
+Mid Iron,Fast,"Srixon Z-STAR",126.61,16.84,1.19,6680,107.8,49.28,181.26,188.1
+Mid Iron,Fast,"PXG Xtreme Tour",127.36,17.13,1.71,6481,109.78,49.04,185.84,194.49
+Mid Iron,Fast,"Callaway Chrome Tour",127.16,17.14,1.01,6343,109.93,48.83,185.52,192.96
+Mid Iron,Fast,"Wilson Staff Model X",127.33,16.68,1.59,7090,108.25,48.78,181.69,186.82
+Mid Iron,Fast,"Callaway Chrome Tour Triple Diamond",127.44,16.83,1.45,6777,109.75,48.77,180.11,184.97
+Mid Iron,Fast,"Maxfli Tour X",127.67,16.95,1.63,6691,109.24,48.5,185.68,193.86
+Mid Iron,Fast,"Member's Mark Pro Series 2",126.48,16.98,1.86,6401,106.98,48.44,180.85,188.26
+Mid Iron,Fast,"Vice Pro Plus",126.79,17.02,1.87,6664,108.67,48.42,183.36,189.79
+Mid Iron,Fast,"Titleist AVX",127.06,17.09,1.53,6417,108.07,48.35,185.42,193.56
+Mid Iron,Fast,"Kirkland Performance+ v3.5",126.65,16.7,0.76,6817,106.07,48.28,181.76,189.36
+Mid Iron,Fast,"Titleist Pro V1",127.2,17,1.11,6626,108.08,48.23,183.89,190.91
+Mid Iron,Fast,"Wilson Triad",126.7,16.95,1.62,6400,106.62,48.18,182.8,190.79
+Mid Iron,Fast,"Callaway Supersoft",126.87,17.37,1.62,5848,109.05,48.16,183.48,191.12
+Mid Iron,Fast,"TaylorMade TP5x",126.75,17.47,1.38,6200,109.93,48.15,184.97,192.41
+Mid Iron,Fast,"Srixon Q-STAR ULTISPEED",127.59,16.67,1.61,6813,107.64,48.12,183.77,191.07
+Mid Iron,Fast,"Vice Pro",126.79,17.2,0.81,6296,107.47,48.09,185.43,194.74
+Mid Iron,Fast,"Callaway ERC Soft",127.23,17.49,1.48,6021,110.19,48.05,186.07,194.53
+Mid Iron,Fast,"Mizuno Pro X",126.82,17.05,1.74,6613,107.13,48.01,184.74,192.86
+Mid Iron,Mid,"Mizuno Pro X",107.42,18.3,-0.34,5991,82.04,48.37,143.2,151.08
+Mid Iron,Mid,"Mizuno Pro S",105.3,18.57,0.09,5661,80.47,47.78,141.26,148.37
+Mid Iron,Mid,"Callaway Chrome Soft",105.93,18.34,-0.08,6093,80.45,47.51,142.76,149.82
+Mid Iron,Mid,"Titleist AVX",106.15,18.54,0.45,5722,80.6,47.4,143.53,150.24
+Mid Iron,Mid,"Srixon Z-STAR DIVIDE",106.1,18.23,0.02,6378,78.35,47.09,140.85,147.55
+Mid Iron,Mid,"Member's Mark Pro Series 2",106.07,18.26,-0.01,5872,79.92,47.04,141.35,148.63
+Mid Iron,Mid,"Vice Pro Air",105.4,18.89,-0.14,5740,79.8,46.81,142.37,149.98
+Mid Iron,Mid,"Srixon Q-STAR TOUR",106.22,18.34,-0.23,6345,78.03,46.77,141.52,147.75
+Mid Iron,Mid,"Callaway Chrome Tour",106.65,18.62,0.21,5854,81,46.63,147.24,154.51
+Mid Iron,Mid,"Srixon Z-STAR XV",107.26,18.24,0.39,6326,79.02,46.54,144.56,153.53
+Mid Iron,Mid,"Titleist Pro V1x",108.17,18.28,-0.21,6352,80.23,46.41,144.44,153.93
+Mid Iron,Mid,"Bridgestone TOUR B RXS",105.34,18.71,0,5933,78.62,46.12,141.84,148.63
+Mid Iron,Mid,"Maxfli Tour",105.94,18.47,0.34,6225,77.31,45.99,145.65,152.87
+Mid Iron,Mid,"Bridgestone TOUR B RX",105.78,18.62,-0.16,5746,79.02,45.81,144.23,151.93
+Mid Iron,Mid,"TaylorMade TP5x",106.68,18.93,0.06,5797,80.48,45.68,145.08,154.65
+Mid Iron,Mid,"Maxfli Tour X",107.01,18.52,-0.09,6102,80,45.66,146.67,155.43
+Mid Iron,Mid,"PXG Xtreme Tour X",106.41,18.5,0.27,6226,77.6,45.36,144.23,152.65
+Mid Iron,Mid,"Wilson Triad",105.42,18.63,0.28,6137,75.78,45.08,144,152.45
+Mid Iron,Mid,"Kirkland Performance+ v3.5",106.1,18.4,0.53,6352,76.32,45,143.95,152.16
+Mid Iron,Mid,"Titleist Pro V1x Left Dash",106.12,18.5,0.4,5971,76.68,44.99,142.69,151.25
+Mid Iron,Mid,"Maxfli Tour S",105.76,18.84,0.01,5628,78.74,44.94,147.89,156.98
+Mid Iron,Mid,"Wilson Staff Model",106.32,18.28,0.02,6146,78.17,44.83,147.03,156.11
+Mid Iron,Mid,"Callaway Chrome Tour Triple Diamond",106.73,18.34,0.23,6240,76.94,44.65,144.38,153.05
+Mid Iron,Mid,"Srixon Z-STAR",106.52,18.35,0.43,6539,76.5,44.53,146.06,154.27
+Mid Iron,Mid,"Titleist Tour Soft",105.11,18.14,0.37,6775,73.68,44.4,141.26,148.99
+Mid Iron,Mid,"Srixon Z-STAR DIAMOND",106.75,17.98,0.16,6735,74.54,44.36,143.81,150.6
+Mid Iron,Mid,"Titleist TruFeel",104.5,18.94,-0.16,6149,74.66,44.28,142.12,150.98
+Mid Iron,Mid,"Callaway Supersoft",106.58,19.93,0.24,5455,80.22,44.24,150.29,160.29
+Mid Iron,Mid,"Callaway Chrome Tour X",107.34,18.31,0.26,6634,75.86,44.17,149.05,157.94
+Mid Iron,Mid,"PXG Xtreme Tour",106.09,18.67,-0.11,6034,76.28,44.16,148.77,156.88
+Mid Iron,Mid,"Srixon SOFT FEEL",105.11,19.24,0,5841,76.21,44.1,146.27,155.1
+Mid Iron,Mid,"Callaway ERC Soft",105.17,19.56,-0.3,5449,76.76,44,147.64,158.17
+Mid Iron,Mid,"Vice Pro Plus",106.2,18.73,0.08,6016,76.81,43.87,145.35,154.34
+Mid Iron,Mid,"Titleist Pro V1",106.49,18.5,0.08,6315,75.58,43.6,146.89,155.95
+Mid Iron,Mid,"Wilson Staff Model X",106.73,18.17,0.63,6644,74.83,43.48,145.27,152.93
+Mid Iron,Mid,"TaylorMade Tour Response",106.19,19.23,0.4,5594,77.32,43.41,147.24,157.01
+Mid Iron,Mid,"Titleist Velocity",106.44,18.65,0.13,6197,75.86,43.32,146.29,156.34
+Mid Iron,Mid,"Pinnacle Rush",106.38,19.06,0.26,5844,75.71,42.87,150.69,161.1
+Mid Iron,Mid,"Bridgestone TOUR B X",106.21,18.31,0.54,6354,73.58,42.85,144.58,153.95
+Mid Iron,Mid,"Srixon Q-STAR ULTISPEED",105.32,18.89,-0.15,6069,73.37,42.7,145.6,155.76
+Mid Iron,Slow,"TaylorMade Tour Response",88.24,23.71,0.75,4260,61.38,40.73,116.03,129.64
+Mid Iron,Slow,"Titleist Pro V1x",87.63,22.7,-0.39,5338,57.64,40.66,112.61,122.17
+Mid Iron,Slow,"Callaway Chrome Tour X",88.05,22.41,-1.25,5346,58.48,40.62,115.01,125.5
+Mid Iron,Slow,"Pinnacle Rush",87.81,22.86,-1.34,5233,58.44,40.55,116.11,128.87
+Mid Iron,Slow,"Callaway Supersoft",88.42,23.59,0.01,4743,61.03,40.54,119.25,133.1
+Mid Iron,Slow,"Titleist Tour Soft",88.51,22.59,0.36,5506,58.81,40.41,117.22,128.31
+Mid Iron,Slow,"Vice Pro Plus",88.1,23.36,-0.3,4844,59.36,40.28,118.11,135.03
+Mid Iron,Slow,"Titleist Pro V1",88.3,23.01,0.15,5014,58.94,40.09,117.49,131.11
+Mid Iron,Slow,"TaylorMade SpeedSoft",87.98,23.75,0.81,4625,59.87,40.03,118.36,133.16
+Mid Iron,Slow,"Maxfli Tour",88.06,23.19,-0.01,4774,58.85,39.87,117.66,134.23
+Mid Iron,Slow,"Wilson Staff Model X",88.26,22.58,0.48,5122,57.83,39.78,117.98,134.13
+Mid Iron,Slow,"PXG Xtreme Tour X",88.29,23.23,-0.13,4810,58.58,39.76,118.95,133.51
+Mid Iron,Slow,"Callaway ERC Soft",87.94,24.12,-0.18,4269,60.35,39.7,119.11,134.83
+Mid Iron,Slow,"Callaway Chrome Tour Triple Diamond",87.96,23.61,0.56,4570,58.99,39.69,118.47,132.88
+Mid Iron,Slow,"Titleist Pro V1x Left Dash",87.72,23.4,-0.96,4564,58.16,39.64,118.56,135
+Mid Iron,Slow,"Srixon Z-STAR DIAMOND",88.28,22.31,0.43,5415,56.26,39.64,116.76,131.8
+Mid Iron,Slow,"Srixon Z-STAR XV",87.99,22.85,-0.34,5160,57.84,39.64,115.29,127.02
+Mid Iron,Slow,"Wilson Staff Model",88.04,23.09,1.88,4900,58.04,39.6,117.2,131.61
+Mid Iron,Slow,"Mizuno Pro S",87.48,23.71,2.98,4325,59.01,39.51,117.54,133.5
+Mid Iron,Slow,"TaylorMade TP5x",87.83,23.51,-2.21,4692,58.92,39.37,118.02,130.32
+Mid Iron,Slow,"Maxfli Tour X",88.02,23.28,-1.07,4761,58.89,39.31,118.39,131.4
+Mid Iron,Slow,"Bridgestone TOUR B RX",88.12,23.67,2.83,4438,58.82,39.27,117.83,133.31
+Sand Wedge,Wedge - 35 Yards,"Titleist AVX",44.09,29.47,0.25,5646,17.32,34.72,35.89,41.57
+Sand Wedge,Wedge - 35 Yards,"Vice Pro Air",44.21,29.46,0.26,5592,17.4,34.7,36.3,42.08
+Sand Wedge,Wedge - 35 Yards,"Mizuno Pro S",43.8,29.55,0.25,5496,17.14,34.65,35.58,41.52
+Sand Wedge,Wedge - 35 Yards,"Mizuno Pro X",43.92,29.43,0.24,5626,17.17,34.6,35.69,41.36
+Sand Wedge,Wedge - 35 Yards,"Member's Mark Pro Series 2",43.67,29.45,0.24,5578,16.97,34.6,35.22,40.41
+Sand Wedge,Wedge - 35 Yards,"PXG Xtreme Tour X",44.14,29.39,0.25,5682,17.3,34.6,36.1,41.98
+Sand Wedge,Wedge - 35 Yards,"TaylorMade TP5",44.32,29.13,0.25,6009,17.22,34.5,36.1,42.14
+Sand Wedge,Wedge - 35 Yards,"Bridgestone TOUR B RX",44.36,29.2,0.25,5693,17.27,34.47,36.2,42.54
+Sand Wedge,Wedge - 35 Yards,"Maxfli Tour X",44.3,29.15,0.25,5948,17.21,34.47,36.04,41.88
+Sand Wedge,Wedge - 35 Yards,"Maxfli Tour",44.26,29.19,0.26,5798,17.22,34.45,35.99,42.14
+Sand Wedge,Wedge - 35 Yards,"Srixon Z-STAR DIVIDE",44.06,29.24,0.25,5818,17.12,34.44,35.69,41.36
+Sand Wedge,Wedge - 35 Yards,"Wilson Staff Model",44.3,29.12,0.25,5911,17.2,34.44,36.2,41.31
+Sand Wedge,Wedge - 35 Yards,"Titleist Pro V1x Left Dash",43.68,29.33,0.24,5698,16.88,34.44,35.27,40.99
+Sand Wedge,Wedge - 35 Yards,"Callaway Chrome Tour",44,29.24,0.25,5735,17.07,34.42,35.74,41.52
+Sand Wedge,Wedge - 35 Yards,"Vice Pro",44.32,29.12,0.25,5773,17.2,34.37,36.2,42.14
+Sand Wedge,Wedge - 35 Yards,"Srixon Z-STAR",44.19,29.13,0.25,5814,17.12,34.36,35.94,41.93
+Sand Wedge,Wedge - 35 Yards,"Titleist Pro V1",44.7,29,0.07,5689,17.35,34.35,36.7,43.25
+Sand Wedge,Wedge - 35 Yards,"Bridgestone TOUR B RXS",44.19,29.13,0.25,5718,17.11,34.34,35.94,42.19
+Sand Wedge,Wedge - 35 Yards,"Srixon Z-STAR XV",44.17,29.05,0.25,5837,17.01,34.31,35.79,41.31
+Sand Wedge,Wedge - 35 Yards,"Wilson Triad",44.32,29.07,0.25,5743,17.18,34.3,36.15,42.34
+Sand Wedge,Wedge - 35 Yards,"Wilson Staff Model X",44.52,28.96,0.24,5992,17.22,34.28,36.4,42.29
+Sand Wedge,Wedge - 35 Yards,"Srixon Z-STAR DIAMOND",44.2,28.96,0.24,5913,16.99,34.23,35.89,41.52

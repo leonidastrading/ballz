@@ -194,7 +194,7 @@ const SOURCES = [
     ],
     ballLevelBars: [],
     footerNote:
-      "Data: MyGolfSpy 2025 Ball Test — single-shot driver/mid-iron/wedge results, 44 balls (coverage varies by ball/condition).",
+      "Data: MyGolfSpy 2025 Ball Test (corrected/complete dataset) — single-shot driver/mid-iron/wedge results, 44 balls; coverage still varies slightly by ball/condition since not every ball was hit under every condition in the original test.",
   },
   {
     id: "balladdict",
