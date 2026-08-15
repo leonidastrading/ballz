@@ -678,6 +678,8 @@ export default function Home() {
                               style={
                                 d.isAverage
                                   ? { ...styles.cellLabel, fontWeight: 700, fontStyle: "italic", color: "#eee" }
+                                  : coverNameColor(d.cover)
+                                  ? { ...styles.cellLabel, color: coverNameColor(d.cover) }
                                   : styles.cellLabel
                               }
                             >
@@ -722,11 +724,7 @@ export default function Home() {
               1,
               ...condData.map((d) => (panel.signed ? Math.abs(d[panel.key] || 0) : d[panel.key] || 0))
             );
-            const isDriverCondition = condition.toLowerCase().includes("driver");
-            const isDriverDistancePanel =
-              isDriverCondition && (panel.key === "carry" || panel.key === "total");
-            const isSpinPanel = panel.key === "spin";
-            const colorNameByCover = isDriverDistancePanel || isSpinPanel;
+            const colorNameByCover = true;
             return (
               <section style={styles.panel} key={panel.key}>
                 <div style={styles.panelHeadRow}>
@@ -735,12 +733,10 @@ export default function Home() {
                   </h2>
                   <SortButton dir={dir} onClick={() => cycleSort(panel.key)} label={panel.label} />
                 </div>
-                {colorNameByCover && (
-                  <p style={styles.coverInfoText}>
-                    Ball name color: <span style={{ color: "#a9c6f5" }}>slightly blue = Urethane cover</span>,{" "}
-                    <span style={{ color: "#f2a9a9" }}>slightly red = Ionomer cover</span>.
-                  </p>
-                )}
+                <p style={styles.coverInfoText}>
+                  Ball name color: <span style={{ color: "#a9c6f5" }}>slightly blue = Urethane cover</span>,{" "}
+                  <span style={{ color: "#f2a9a9" }}>slightly red = Ionomer cover</span>.
+                </p>
                 <BarPanel
                   data={sorted}
                   valueKey={panel.key}
@@ -757,7 +753,7 @@ export default function Home() {
       )}
 
       {(activeSource.ballLevelBars || []).map((bl) => {
-        const colorNameByCover = bl.key === "compression";
+        const colorNameByCover = true;
         return (
           <section style={styles.panel} key={bl.key}>
             <div style={styles.panelHeadRow}>
@@ -823,6 +819,7 @@ export default function Home() {
               return {
                 name: b.name,
                 color: BALL_COLORS[b.name],
+                cover: b.cover,
                 dry,
                 wet,
                 sortval: delta,
@@ -852,12 +849,17 @@ export default function Home() {
                   scale: {fmt(domainMin, panel.digits ?? 1)} – {fmt(domainMax, panel.digits ?? 1)}
                   {panel.suffix || ""}
                 </div>
+                <p style={styles.coverInfoText}>
+                  Ball name color: <span style={{ color: "#a9c6f5" }}>slightly blue = Urethane cover</span>,{" "}
+                  <span style={{ color: "#f2a9a9" }}>slightly red = Ionomer cover</span>.
+                </p>
                 <RangeBarChart
                   data={sorted}
                   domainMin={domainMin}
                   domainMax={domainMax}
                   digits={panel.digits ?? 1}
                   suffix={panel.suffix || ""}
+                  colorNameByCover
                 />
               </section>
             );
@@ -886,6 +888,8 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
               style={
                 d.isAverage
                   ? { ...styles.errorLabel, fontWeight: 700, fontStyle: "italic", color: "#eee" }
+                  : coverNameColor(d.cover)
+                  ? { ...styles.errorLabel, color: coverNameColor(d.cover) }
                   : styles.errorLabel
               }
             >
@@ -990,7 +994,17 @@ function OverlapCircleChart({ data, valueKey, maxValue, digits = 1, valueSuffix 
         {data.map((d) => (
           <div key={d.name} style={styles.overlapLegendItem}>
             <span style={{ ...styles.swatch, background: d.color, flex: "0 0 auto" }} />
-            <span style={d.isAverage ? styles.overlapLegendNameAvg : styles.overlapLegendName}>{d.name}</span>
+            <span
+              style={
+                d.isAverage
+                  ? styles.overlapLegendNameAvg
+                  : coverNameColor(d.cover)
+                  ? { ...styles.overlapLegendName, color: coverNameColor(d.cover) }
+                  : styles.overlapLegendName
+              }
+            >
+              {d.name}
+            </span>
             <span style={styles.overlapLegendValue}>
               {d[valueKey] == null ? "—" : `${fmt(d[valueKey], digits)}${valueSuffix}`}
             </span>
@@ -1062,7 +1076,7 @@ function BarPanel({ data, valueKey, maxValue, digits = 1, suffix = "", signed = 
   );
 }
 
-function RangeBarChart({ data, domainMin, domainMax, digits = 1, suffix = "" }) {
+function RangeBarChart({ data, domainMin, domainMax, digits = 1, suffix = "", colorNameByCover = false }) {
   const span = domainMax - domainMin || 1;
   const toPct = (v) => Math.min(100, Math.max(0, ((v - domainMin) / span) * 100));
   return (
@@ -1081,6 +1095,8 @@ function RangeBarChart({ data, domainMin, domainMax, digits = 1, suffix = "" }) 
               style={
                 d.isAverage
                   ? { ...styles.barLabel, fontWeight: 700, fontStyle: "italic", color: "#eee" }
+                  : colorNameByCover && coverNameColor(d.cover)
+                  ? { ...styles.barLabel, color: coverNameColor(d.cover) }
                   : styles.barLabel
               }
             >
