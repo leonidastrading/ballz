@@ -56,6 +56,7 @@ const SOURCES = [
       { type: "bar", key: "carry", label: "Carry", unit: "(yd)", digits: 1, suffix: " yd" },
       { type: "bar", key: "total", label: "Total Distance", unit: "(yd)", digits: 1, suffix: " yd" },
       { type: "bar", key: "spin", label: "Spin", unit: "(rpm)", digits: 0, suffix: " rpm" },
+      { type: "bar", key: "launch", label: "Launch Angle", unit: "(°)", digits: 1, suffix: "°" },
     ],
     ballLevelBars: [
       {
@@ -78,7 +79,7 @@ const SOURCES = [
       { key: "spray", label: "Side Spray", unit: "(yd)", digits: 2, suffix: " yd" },
       { key: "range", label: "Distance Range", unit: "(yd)", digits: 2, suffix: " yd" },
     ],
-    footerNote: "Data: MyGolfSpy 2026 Ball Test — dispersion & compression.",
+    footerNote: "Data: MyGolfSpy 2026 Ball Test — dispersion, compression & launch angle.",
   },
   {
     id: "todaysgolfer2024",
