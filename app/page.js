@@ -307,12 +307,12 @@ const SOURCES = [
 
 const SOURCE_COLORS = Object.fromEntries(SOURCES.map((s) => [s.id, colorsFor(s.balls)]));
 
-// When more than this many balls are selected, add a synthetic "Average" entry
-// (striped black/white) to every chart so you can see how each ball compares
-// to the field average, treated just like any other ball.
-const AVERAGE_THRESHOLD = 5;
+// A synthetic "Average" entry (black/white polka-dot fill) is always added to every
+// chart, computed from ALL balls in the current dataset (not just the ones currently
+// selected), so you always have the field average to compare against — even if you've
+// only selected a single ball.
 const AVERAGE_STRIPE_CSS =
-  "repeating-linear-gradient(45deg, #0a0a0a 0px, #0a0a0a 6px, #f2f2f2 6px, #f2f2f2 12px)";
+  "radial-gradient(#f2f2f2 26%, transparent 27%) 0 0/11px 11px, radial-gradient(#f2f2f2 26%, transparent 27%) 5.5px 5.5px/11px 11px, #0a0a0a";
 
 function average(values) {
   const nums = values.filter((v) => typeof v === "number" && !Number.isNaN(v));
@@ -320,23 +320,25 @@ function average(values) {
   return nums.reduce((a, b) => a + b, 0) / nums.length;
 }
 
-function withAverageEntry(items, excludeKeys) {
-  if (items.length <= AVERAGE_THRESHOLD) return items;
+// `selectedItems` are shown as normal bars/points; `allItems` (the FULL ball population
+// for this dataset/condition) is what the appended "Average" entry is computed from.
+function withGlobalAverageEntry(selectedItems, allItems, excludeKeys) {
+  if (!allItems.length) return selectedItems;
   const keys = new Set();
-  items.forEach((it) =>
+  allItems.forEach((it) =>
     Object.keys(it).forEach((k) => {
       if (!excludeKeys.includes(k)) keys.add(k);
     })
   );
   const avgEntry = {
-    name: `Average (${items.length} balls)`,
+    name: `Average (all ${allItems.length} balls)`,
     color: AVERAGE_STRIPE_CSS,
     isAverage: true,
   };
   keys.forEach((k) => {
-    avgEntry[k] = average(items.map((it) => it[k]));
+    avgEntry[k] = average(allItems.map((it) => it[k]));
   });
-  return [...items, avgEntry];
+  return [...selectedItems, avgEntry];
 }
 
 // Builds a plain-text summary of exactly what's currently on screen (tab, condition,
@@ -917,7 +919,15 @@ export default function Home() {
     cover: b.cover,
     ...b.conditions[condition],
   }));
-  const condData = withAverageEntry(condDataRaw, ["name", "color", "meta", "isAverage"]);
+  const condDataAllRaw = activeSource.balls.map((b) => ({
+    name: b.name,
+    color: BALL_COLORS[b.name],
+    meta: b.meta,
+    compression: b.compression,
+    cover: b.cover,
+    ...b.conditions[condition],
+  }));
+  const condData = withGlobalAverageEntry(condDataRaw, condDataAllRaw, ["name", "color", "meta", "isAverage"]);
 
   const CIRCLE_MAX_RADIUS = 70; // px, for the largest footprint among selected
   const LINE_MAX_HALF = 220; // px, half-width for the largest spray/range among selected
@@ -928,7 +938,13 @@ export default function Home() {
     cover: b.cover,
     ...Object.fromEntries((activeSource.ballLevelBars || []).map((bl) => [bl.key, b[bl.key]])),
   }));
-  const ballLevelData = withAverageEntry(ballLevelDataRaw, ["name", "color", "isAverage"]);
+  const ballLevelDataAllRaw = activeSource.balls.map((b) => ({
+    name: b.name,
+    color: BALL_COLORS[b.name],
+    cover: b.cover,
+    ...Object.fromEntries((activeSource.ballLevelBars || []).map((bl) => [bl.key, b[bl.key]])),
+  }));
+  const ballLevelData = withGlobalAverageEntry(ballLevelDataRaw, ballLevelDataAllRaw, ["name", "color", "isAverage"]);
 
   // Fields available to plot on the scatter chart: every condition-panel metric
   // plus every ball-level (condition-independent) metric, deduped by key.
@@ -1274,7 +1290,7 @@ export default function Home() {
           {activeSource.wedgeWetDryPanels.map((panel) => {
             const sortKey = `wetdry_${panel.key}`;
             const dir = getDir(sortKey);
-            const rawBase = selectedBalls.map((b) => {
+            const wetDryEntry = (b) => {
               const entry = activeSource.wedgeWetDryData[b.name] || {};
               const dry = entry.dry ? entry.dry[panel.key] ?? null : null;
               const wet = entry.wet ? entry.wet[panel.key] ?? null : null;
@@ -1287,8 +1303,10 @@ export default function Home() {
                 wet,
                 sortval: delta,
               };
-            });
-            const raw = withAverageEntry(rawBase, ["name", "color", "isAverage"]);
+            };
+            const rawBase = selectedBalls.map(wetDryEntry);
+            const rawAllBase = activeSource.balls.map(wetDryEntry);
+            const raw = withGlobalAverageEntry(rawBase, rawAllBase, ["name", "color", "isAverage"]);
             const sorted = sortByKey(raw, "sortval", dir);
             const vals = raw.flatMap((d) => [d.dry, d.wet]).filter((v) => v !== null && v !== undefined);
             let domainMin = vals.length ? Math.min(...vals) : 0;
@@ -1411,9 +1429,10 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
 function AverageStripeDefs({ id }) {
   return (
     <defs>
-      <pattern id={id} width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-        <rect width="8" height="8" fill="#0a0a0a" />
-        <rect width="4" height="8" fill="#f2f2f2" />
+      <pattern id={id} width="11" height="11" patternUnits="userSpaceOnUse">
+        <rect width="11" height="11" fill="#0a0a0a" />
+        <circle cx="2.75" cy="2.75" r="2.15" fill="#f2f2f2" />
+        <circle cx="8.25" cy="8.25" r="2.15" fill="#f2f2f2" />
       </pattern>
     </defs>
   );
