@@ -307,15 +307,21 @@ const SOURCES = [
 
 const SOURCE_COLORS = Object.fromEntries(SOURCES.map((s) => [s.id, colorsFor(s.balls)]));
 
-// A synthetic "Average" entry (black/white polka-dot fill) is always added to every
-// chart, computed from ALL balls in the current dataset (not just the ones currently
-// selected), so you always have the field average to compare against — even if you've
-// only selected a single ball.
+// Two synthetic "Average" entries can be appended to every chart:
+//  - "Average of selected" (diagonal black/white stripes) — the average of just the
+//    balls you've currently picked, shown once you've selected more than a handful.
+//  - "Average (all N balls)" (black/white polka-dots) — the average across the ENTIRE
+//    dataset for this tab/condition, always shown so you always have the field average
+//    to compare against, even with only one ball selected.
+const AVERAGE_THRESHOLD = 5;
+
 // Bulletproof SVG data-URI tile (not a CSS gradient) so the black/white polka-dot
 // pattern renders identically and boldly everywhere, instead of a subtle/near-invisible
 // gradient checker.
-const AVERAGE_STRIPE_CSS =
+const GLOBAL_AVERAGE_CSS =
   "url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCI+PHJlY3Qgd2lkdGg9IjE0IiBoZWlnaHQ9IjE0IiBmaWxsPSIjMGEwYTBhIi8+PGNpcmNsZSBjeD0iMy41IiBjeT0iMy41IiByPSIzIiBmaWxsPSIjZjJmMmYyIi8+PGNpcmNsZSBjeD0iMTAuNSIgY3k9IjEwLjUiIHI9IjMiIGZpbGw9IiNmMmYyZjIiLz48L3N2Zz4=) 0 0/14px 14px repeat";
+const GROUP_AVERAGE_CSS =
+  "repeating-linear-gradient(45deg, #0a0a0a 0px, #0a0a0a 6px, #f2f2f2 6px, #f2f2f2 12px)";
 
 function average(values) {
   const nums = values.filter((v) => typeof v === "number" && !Number.isNaN(v));
@@ -323,25 +329,43 @@ function average(values) {
   return nums.reduce((a, b) => a + b, 0) / nums.length;
 }
 
-// `selectedItems` are shown as normal bars/points; `allItems` (the FULL ball population
-// for this dataset/condition) is what the appended "Average" entry is computed from.
-function withGlobalAverageEntry(selectedItems, allItems, excludeKeys) {
-  if (!allItems.length) return selectedItems;
+function buildAverageEntry(items, excludeKeys, name, color, avgKind) {
   const keys = new Set();
-  allItems.forEach((it) =>
+  items.forEach((it) =>
     Object.keys(it).forEach((k) => {
       if (!excludeKeys.includes(k)) keys.add(k);
     })
   );
-  const avgEntry = {
-    name: `Average (all ${allItems.length} balls)`,
-    color: AVERAGE_STRIPE_CSS,
-    isAverage: true,
-  };
+  const avgEntry = { name, color, isAverage: true, avgKind };
   keys.forEach((k) => {
-    avgEntry[k] = average(allItems.map((it) => it[k]));
+    avgEntry[k] = average(items.map((it) => it[k]));
   });
-  return [...selectedItems, avgEntry];
+  return avgEntry;
+}
+
+// `selectedItems` are shown as normal bars/points. `allItems` is the FULL ball
+// population for this dataset/condition, used for the always-on global average.
+// A second "average of selected" entry is added on top of that once more than
+// AVERAGE_THRESHOLD balls are selected.
+function withAverages(selectedItems, allItems, excludeKeys) {
+  const out = [...selectedItems];
+  if (selectedItems.length > AVERAGE_THRESHOLD) {
+    out.push(
+      buildAverageEntry(
+        selectedItems,
+        excludeKeys,
+        `Average of selected (${selectedItems.length})`,
+        GROUP_AVERAGE_CSS,
+        "group"
+      )
+    );
+  }
+  if (allItems.length) {
+    out.push(
+      buildAverageEntry(allItems, excludeKeys, `Average (all ${allItems.length} balls)`, GLOBAL_AVERAGE_CSS, "global")
+    );
+  }
+  return out;
 }
 
 // Builds a plain-text summary of exactly what's currently on screen (tab, condition,
@@ -930,7 +954,7 @@ export default function Home() {
     cover: b.cover,
     ...b.conditions[condition],
   }));
-  const condData = withGlobalAverageEntry(condDataRaw, condDataAllRaw, ["name", "color", "meta", "isAverage"]);
+  const condData = withAverages(condDataRaw, condDataAllRaw, ["name", "color", "meta", "isAverage"]);
 
   const CIRCLE_MAX_RADIUS = 70; // px, for the largest footprint among selected
   const LINE_MAX_HALF = 220; // px, half-width for the largest spray/range among selected
@@ -947,7 +971,7 @@ export default function Home() {
     cover: b.cover,
     ...Object.fromEntries((activeSource.ballLevelBars || []).map((bl) => [bl.key, b[bl.key]])),
   }));
-  const ballLevelData = withGlobalAverageEntry(ballLevelDataRaw, ballLevelDataAllRaw, ["name", "color", "isAverage"]);
+  const ballLevelData = withAverages(ballLevelDataRaw, ballLevelDataAllRaw, ["name", "color", "isAverage"]);
 
   // Fields available to plot on the scatter chart: every condition-panel metric
   // plus every ball-level (condition-independent) metric, deduped by key.
@@ -1139,12 +1163,12 @@ export default function Home() {
                         const val = d[panel.key];
                         const r = CIRCLE_MAX_RADIUS * Math.sqrt((val || 0) / maxValue);
                         const size = CIRCLE_MAX_RADIUS * 2 + 20;
-                        const patId = `avgPat-${panel.key}`;
+                        const patId = `avgPat-${panel.key}-${d.avgKind}`;
                         return (
                           <div key={d.name} style={styles.circleCell}>
                             <div style={styles.circleSvgWrap}>
                               <svg viewBox={`0 0 ${size} ${size}`} width="100%" height="100%">
-                                {d.isAverage && <AverageStripeDefs id={patId} />}
+                                {d.isAverage && <AverageStripeDefs id={patId} kind={d.avgKind} />}
                                 <circle
                                   cx={size / 2}
                                   cy={size / 2}
@@ -1309,7 +1333,7 @@ export default function Home() {
             };
             const rawBase = selectedBalls.map(wetDryEntry);
             const rawAllBase = activeSource.balls.map(wetDryEntry);
-            const raw = withGlobalAverageEntry(rawBase, rawAllBase, ["name", "color", "isAverage"]);
+            const raw = withAverages(rawBase, rawAllBase, ["name", "color", "isAverage"]);
             const sorted = sortByKey(raw, "sortval", dir);
             const vals = raw.flatMap((d) => [d.dry, d.wet]).filter((v) => v !== null && v !== undefined);
             let domainMin = vals.length ? Math.min(...vals) : 0;
@@ -1365,7 +1389,7 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
         const hasVal = raw !== null && raw !== undefined;
         const v = hasVal ? raw : 0;
         const halfPx = maxHalfWidth * (v / maxValue);
-        const patId = `avgPatLine-${valueKey}`;
+        const patId = `avgPatLine-${valueKey}-${d.avgKind}`;
         const strokeColor = d.isAverage ? `url(#${patId})` : d.color;
         return (
           <div key={d.name} style={styles.errorRow}>
@@ -1389,7 +1413,7 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
                 preserveAspectRatio="none"
                 style={{ display: "block" }}
               >
-                {d.isAverage && <AverageStripeDefs id={patId} />}
+                {d.isAverage && <AverageStripeDefs id={patId} kind={d.avgKind} />}
                 {hasVal && (
                   <>
                     <line
@@ -1429,7 +1453,19 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
   );
 }
 
-function AverageStripeDefs({ id }) {
+// Renders the right black/white SVG pattern for an average entry: diagonal stripes
+// for "average of selected", polka dots for the always-on "average of all balls".
+function AverageStripeDefs({ id, kind }) {
+  if (kind === "group") {
+    return (
+      <defs>
+        <pattern id={id} width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="8" height="8" fill="#0a0a0a" />
+          <rect width="4" height="8" fill="#f2f2f2" />
+        </pattern>
+      </defs>
+    );
+  }
   return (
     <defs>
       <pattern id={id} width="14" height="14" patternUnits="userSpaceOnUse">
@@ -1444,8 +1480,10 @@ function AverageStripeDefs({ id }) {
 function OverlapCircleChart({ data, valueKey, maxValue, digits = 1, valueSuffix = "" }) {
   const MAX_R = 150;
   const size = MAX_R * 2 + 24;
-  const patId = `avgPatOverlap-${valueKey}`;
-  const hasAvg = data.some((d) => d.isAverage);
+  const patIdGroup = `avgPatOverlap-${valueKey}-group`;
+  const patIdGlobal = `avgPatOverlap-${valueKey}-global`;
+  const hasGroupAvg = data.some((d) => d.avgKind === "group");
+  const hasGlobalAvg = data.some((d) => d.avgKind === "global");
   // Draw largest first (bottom of stack) so smaller circles stay visible on top.
   const drawOrder = [...data].sort((a, b) => (b[valueKey] || 0) - (a[valueKey] || 0));
 
@@ -1453,11 +1491,13 @@ function OverlapCircleChart({ data, valueKey, maxValue, digits = 1, valueSuffix 
     <div>
       <div style={styles.overlapSvgWrap}>
         <svg viewBox={`0 0 ${size} ${size}`} width="100%" height="100%" style={{ display: "block" }}>
-          {hasAvg && <AverageStripeDefs id={patId} />}
+          {hasGroupAvg && <AverageStripeDefs id={patIdGroup} kind="group" />}
+          {hasGlobalAvg && <AverageStripeDefs id={patIdGlobal} kind="global" />}
           {drawOrder.map((d) => {
             const val = d[valueKey];
             if (val === null || val === undefined) return null;
             const r = Math.max(MAX_R * Math.sqrt(val / maxValue), 3);
+            const patId = d.avgKind === "group" ? patIdGroup : patIdGlobal;
             return (
               <circle
                 key={d.name}
