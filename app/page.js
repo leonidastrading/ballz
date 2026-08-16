@@ -311,8 +311,11 @@ const SOURCE_COLORS = Object.fromEntries(SOURCES.map((s) => [s.id, colorsFor(s.b
 // chart, computed from ALL balls in the current dataset (not just the ones currently
 // selected), so you always have the field average to compare against — even if you've
 // only selected a single ball.
+// Bulletproof SVG data-URI tile (not a CSS gradient) so the black/white polka-dot
+// pattern renders identically and boldly everywhere, instead of a subtle/near-invisible
+// gradient checker.
 const AVERAGE_STRIPE_CSS =
-  "radial-gradient(#f2f2f2 26%, transparent 27%) 0 0/11px 11px, radial-gradient(#f2f2f2 26%, transparent 27%) 5.5px 5.5px/11px 11px, #0a0a0a";
+  "url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCI+PHJlY3Qgd2lkdGg9IjE0IiBoZWlnaHQ9IjE0IiBmaWxsPSIjMGEwYTBhIi8+PGNpcmNsZSBjeD0iMy41IiBjeT0iMy41IiByPSIzIiBmaWxsPSIjZjJmMmYyIi8+PGNpcmNsZSBjeD0iMTAuNSIgY3k9IjEwLjUiIHI9IjMiIGZpbGw9IiNmMmYyZjIiLz48L3N2Zz4=) 0 0/14px 14px repeat";
 
 function average(values) {
   const nums = values.filter((v) => typeof v === "number" && !Number.isNaN(v));
@@ -1429,10 +1432,10 @@ function ErrorLineChart({ data, valueKey, maxValue, maxHalfWidth, suffix = "" })
 function AverageStripeDefs({ id }) {
   return (
     <defs>
-      <pattern id={id} width="11" height="11" patternUnits="userSpaceOnUse">
-        <rect width="11" height="11" fill="#0a0a0a" />
-        <circle cx="2.75" cy="2.75" r="2.15" fill="#f2f2f2" />
-        <circle cx="8.25" cy="8.25" r="2.15" fill="#f2f2f2" />
+      <pattern id={id} width="14" height="14" patternUnits="userSpaceOnUse">
+        <rect width="14" height="14" fill="#0a0a0a" />
+        <circle cx="3.5" cy="3.5" r="3" fill="#f2f2f2" />
+        <circle cx="10.5" cy="10.5" r="3" fill="#f2f2f2" />
       </pattern>
     </defs>
   );
