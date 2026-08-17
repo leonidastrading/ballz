@@ -231,7 +231,7 @@ const SOURCES = [
       {
         key: "accuracy",
         label: "Accuracy",
-        unit: "(/10 — normalized; 2025-sheet balls originally rated as a %)",
+        unit: "(/10)",
         maxValue: 10,
         digits: 1,
         suffix: "",
@@ -283,14 +283,6 @@ const SOURCES = [
         maxValue: 10,
         digits: 1,
         suffix: "",
-      },
-      {
-        key: "greenSpin",
-        label: "Green Spin",
-        unit: "(rpm — 2025-sheet balls only)",
-        maxValue: 9000,
-        digits: 0,
-        suffix: " rpm",
       },
       {
         key: "price",
